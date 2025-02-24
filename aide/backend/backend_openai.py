@@ -2,15 +2,29 @@
 
 import json
 import logging
+import multiprocessing
+import os
 import time
+from datetime import datetime
+from pathlib import Path
 
-from .utils import FunctionSpec, OutputType, opt_messages_to_list, backoff_create
-from funcy import notnone, once, select_values
 import openai
+from funcy import notnone, once, select_values
+
+from . import openai_api_pricing
+from .utils import (
+    FunctionSpec,
+    OutputType,
+    backoff_create,
+    opt_messages_to_list,
+)
 
 logger = logging.getLogger("aide")
 
+lock = multiprocessing.Lock()
+
 _client: openai.OpenAI = None  # type: ignore
+oai_spending = None  # type: ignore
 
 OPENAI_TIMEOUT_EXCEPTIONS = (
     openai.RateLimitError,
@@ -20,9 +34,75 @@ OPENAI_TIMEOUT_EXCEPTIONS = (
 )
 
 
+class OAI_Pricing:
+
+    def __init__(self):
+
+        self.last_modified_date = None
+        self.token_spending_file = Path("./backend/spent_tokens.json")
+
+        if not self.token_spending_file.exists():
+
+            self.data = {
+                "dollars_per_run": 0.0,
+                "dollars_today": 0.0,
+                "dollars_forever": 0.0,
+                "tokens_per_run": 0,
+                "tokens_today": 0,
+                "tokens_forever": 0,
+            }
+
+            with lock:
+                with open(self.token_spending_file, "w") as fh:
+                    json.dump(self.data, fh, indent=4)
+
+        else:
+
+            with lock:
+                with open(self.token_spending_file, "r") as fh:
+                    self.data = json.load(fh)
+
+            self.dollars_today = self.data["dollars_today"]
+            self.dollars_forever = self.data["dollars_forever"]
+            self.tokens_today = self.data["tokens_today"]
+            self.tokens_forever = self.data["tokens_forever"]
+
+            # reset per run quantities
+            self.data["dollars_per_run"] = 0.0
+            self.data["tokens_per_run"] = 0
+
+        self.last_modified_date = datetime.fromtimestamp(
+            os.path.getmtime(self.token_spending_file)
+        ).date()
+
+    def update(self, tokens_now: int, dollars_now: float) -> None:
+
+        current_date = datetime.today().date()
+
+        self.data["dollars_per_run"] += dollars_now
+        self.data["dollars_forever"] += dollars_now
+        self.data["tokens_per_run"] += tokens_now
+        self.data["tokens_forever"] += tokens_now
+
+        if current_date > self.last_modified_date:
+
+            self.data["tokens_today"] = 0
+            self.data["dollars_today"] = 0.0
+
+        self.data["tokens_today"] += tokens_now
+        self.data["dollars_today"] += dollars_now
+
+        with lock:
+            with open(self.token_spending_file, "w") as fh:
+                json.dump(self.data, fh, indent=4)
+
+        return self.data
+
+
 @once
 def _setup_openai_client():
-    global _client
+    global _client, oai_spending
+    oai_spending = OAI_Pricing()
     _client = openai.OpenAI(max_retries=0)
 
 
@@ -36,6 +116,8 @@ def query(
     Query the OpenAI API, optionally with function calling.
     If the model doesn't support function calling, gracefully degrade to text generation.
     """
+    global oai_spending
+
     _setup_openai_client()
     filtered_kwargs: dict = select_values(notnone, model_kwargs)
 
@@ -49,6 +131,9 @@ def query(
 
     completion = None
     t0 = time.time()
+
+    if model_kwargs["model"] not in ["gpt-4o-mini", "qwen2.5"]:
+        raise NotImplementedError("Only gpt-4o-mini model is currently allowed")
 
     # Attempt the API call
     try:
@@ -117,6 +202,27 @@ def query(
 
     in_tokens = completion.usage.prompt_tokens
     out_tokens = completion.usage.completion_tokens
+    tokens_now = in_tokens + out_tokens
+
+    if model_kwargs["model"] != "qwen2.5":
+
+        dollars_now = openai_api_pricing.calculate_pricing(
+            model_kwargs["model"], in_tokens, out_tokens
+        )
+
+        spending_dict = oai_spending.update(tokens_now, dollars_now)
+
+        print("\n-------------------------------------")
+        print(f"Spent now = ${dollars_now}")
+        print(f"Spent this run = ${spending_dict['dollars_per_run']}")
+        print(f"Spent today = ${spending_dict['dollars_today']}")
+        print(f"Spent overall = ${spending_dict['dollars_forever']}")
+
+        print(f"Total tokens now = {tokens_now}")
+        print(f"Total tokens this run = {spending_dict['tokens_per_run']}")
+        print(f"Total tokens today = {spending_dict['tokens_today']}")
+        print(f"Total tokens overall = {spending_dict['tokens_forever']}")
+        print("-------------------------------------\n")
 
     info = {
         "system_fingerprint": completion.system_fingerprint,
