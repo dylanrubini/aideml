@@ -16,7 +16,7 @@ preprocess_data: True
 # copying is recommended to prevent the agent from accidentally modifying the original data
 copy_data: True
 
-exp_name: null # a random experiment name will be generated if not provided
+exp_name: trial_run # a random experiment name will be generated if not provided
 
 # settings for code execution
 exec:

@@ -16,23 +16,12 @@ for item in "${allowed_models[@]}"; do
     fi
 done
 
-found=0
-
-for item in "${allowed_models[@]}"; do
-
-    if [[ "$model" == "$item" ]]; then
-        found=1
-        break
-    fi
-done
-
 if [[ $found -eq 1 ]]; then
     echo "✅ Model '$model' is allowed."
 else
     echo "🚨 Model '$model' is NOT allowed."
     return 1
 fi
-
 
 if [[ "$model" == "qwen2.5" ]]; then 
 	if command -v ollama &> /dev/null; then
@@ -61,6 +50,23 @@ if [[ "$model" == "qwen2.5" ]]; then
 
 else 
 
+	ENV_FILE=".env"
+	# Check if the .env file exists
+	if [[ -f "$ENV_FILE" ]]; then
+	    echo "✅ $ENV_FILE exists."
+
+	    # Check if the file contains a non-empty "OPENAI_API_KEY="
+	    if grep -qE '^OPENAI_API_KEY=[^ ]+' "$ENV_FILE"; then
+	        echo "✅ OPENAI_API_KEY is set in $ENV_FILE."
+	    else
+	        echo "🚨 ERROR: OPENAI_API_KEY is missing or empty in $ENV_FILE!"
+	        return 1
+	    fi
+	else
+	    echo "🚨 ERROR: $ENV_FILE does not exist!"
+	    return 1
+	fi
+
 	unset OPENAI_BASE_URL
 	export OPENAI_API_KEY=$(awk -F '=' '/^OPENAI_API_KEY/ {print $2}' .env)
 
@@ -76,6 +82,9 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 else
     sed -i "s/model: .*/model: $model/" ./utils/config.yaml  # Linux
 fi
+
+rm -rf logs/
+rm -rf workspaces/
 
 python trial_run.py
 # python trial_run.py --log-level DEBUG
