@@ -64,7 +64,7 @@ class ExecConfig:
 
 @dataclass
 class Config(Hashable):
-    data_dir: Path
+    data_dir: Path | None
     desc_file: Path | None
 
     goal: str | None
@@ -111,17 +111,16 @@ def load_cfg(path: Path = Path(__file__).parent / "config.yaml") -> Config:
 
 
 def prep_cfg(cfg: Config):
-    if cfg.data_dir is None:
-        raise ValueError("`data_dir` must be provided.")
 
     if cfg.desc_file is None and cfg.goal is None:
         raise ValueError(
             "You must provide either a description of the task goal (`goal=...`) or a path to a plaintext file containing the description (`desc_file=...`)."
         )
 
-    if cfg.data_dir.startswith("example_tasks/"):
-        cfg.data_dir = Path(__file__).parent.parent / cfg.data_dir
-    cfg.data_dir = Path(cfg.data_dir).resolve()
+    if cfg.data_dir is not None:
+        if cfg.data_dir.startswith("example_tasks/"):
+            cfg.data_dir = Path(__file__).parent.parent / cfg.data_dir
+        cfg.data_dir = Path(cfg.data_dir).resolve()
 
     if cfg.desc_file is not None:
         cfg.desc_file = Path(cfg.desc_file).resolve()
@@ -184,13 +183,14 @@ def prep_agent_workspace(cfg: Config):
     (cfg.workspace_dir / "input").mkdir(parents=True, exist_ok=True)
     (cfg.workspace_dir / "working").mkdir(parents=True, exist_ok=True)
 
-    copytree(
-        cfg.data_dir,
-        cfg.workspace_dir / "input",
-        use_symlinks=not cfg.copy_data,
-    )
-    if cfg.preprocess_data:
-        preproc_data(cfg.workspace_dir / "input")
+    if cfg.data_dir is not None:
+        copytree(
+            cfg.data_dir,
+            cfg.workspace_dir / "input",
+            use_symlinks=not cfg.copy_data,
+        )
+        if cfg.preprocess_data:
+            preproc_data(cfg.workspace_dir / "input")
 
 
 def save_run(cfg: Config, journal):

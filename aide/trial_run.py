@@ -1,11 +1,21 @@
+from pathlib import Path
+
 import aide
 
 
 def main():
+
+    task_file = "rebound_basic_task.md"
+    root_task_dir = Path("./example_tasks/")
+    task_file = root_task_dir.joinpath(task_file).resolve()
+
+    with open(task_file) as f:
+        task_desc_str = f.read()
+
     exp = aide.Experiment(
-        data_dir="example_tasks/bitcoin_price",  # replace this with your own directory
-        goal="Build a time series forecasting model for bitcoin close price.",  # replace with your own goal description
-        eval="RMSLE",  # replace with your own evaluation metric
+        data_dir=None,  # replace this with your own directory
+        goal=task_desc_str,  # replace with your own goal description
+        eval="LLM_score",  # replace with your own evaluation metric
     )
 
     best_solution = exp.run(steps=10)
