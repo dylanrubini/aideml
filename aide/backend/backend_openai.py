@@ -228,6 +228,12 @@ def query(
         if tokens_now > per_run_token_limit:
             raise ValueError(f"Exceeded token limit of {per_run_token_limit}")
 
+        max_day_spending = 10.0  # dollars
+        if spending_dict["dollars_today"] > max_day_spending:
+            raise ValueError(
+                f"Exceeded max. day spending limit {max_day_spending}"
+            )
+
     info = {
         "system_fingerprint": completion.system_fingerprint,
         "model": completion.model,
