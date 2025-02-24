@@ -45,6 +45,11 @@ def query(
         system_message = None
         model_kwargs["temperature"] = 1
 
+    if "claude-" in model:
+        raise NotImplementedError(
+            "Only OpenAI models implemented properly atm."
+        )
+
     query_func = (
         backend_anthropic.query if "claude-" in model else backend_openai.query
     )
