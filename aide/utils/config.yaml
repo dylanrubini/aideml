@@ -27,7 +27,7 @@ exec:
 generate_report: True
 # LLM settings for final report from journal
 report:
-  model: qwen2.5
+  model: gpt-4o-mini
   temp: 1.0
 
 # agent hyperparams
@@ -43,12 +43,12 @@ agent:
 
   # LLM settings for coding
   code:
-    model: qwen2.5
+    model: gpt-4o-mini
     temp: 0.5
 
   # LLM settings for evaluating program output / tracebacks
   feedback:
-    model: qwen2.5
+    model: gpt-4o-mini
     temp: 0.5
 
   # hyperparameters for the tree search
@@ -56,3 +56,4 @@ agent:
     max_debug_depth: 3
     debug_prob: 0.5
     num_drafts: 5
+    per_run_token_limit: 20000

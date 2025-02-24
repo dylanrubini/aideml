@@ -8,6 +8,7 @@ def query(
     model: str,
     temperature: float | None = None,
     max_tokens: int | None = None,
+    per_run_token_limit: int | None = None,
     func_spec: FunctionSpec | None = None,
     **model_kwargs,
 ) -> OutputType:
@@ -27,6 +28,9 @@ def query(
         OutputType: A string completion if func_spec is None, otherwise a dict with the function call details.
     """
 
+    if per_run_token_limit is None:
+        per_run_token_limit = 10_000
+
     model_kwargs = model_kwargs | {
         "model": model,
         "temperature": temperature,
@@ -45,6 +49,7 @@ def query(
         backend_anthropic.query if "claude-" in model else backend_openai.query
     )
     output, req_time, in_tok_count, out_tok_count, info = query_func(
+        per_run_token_limit=per_run_token_limit,
         system_message=(
             compile_prompt_to_md(system_message) if system_message else None
         ),

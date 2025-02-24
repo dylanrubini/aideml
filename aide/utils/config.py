@@ -39,6 +39,7 @@ class SearchConfig:
     max_debug_depth: int
     debug_prob: float
     num_drafts: int
+    per_run_token_limit: int
 
 
 @dataclass

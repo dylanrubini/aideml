@@ -107,6 +107,7 @@ def _setup_openai_client():
 
 
 def query(
+    per_run_token_limit: int,
     system_message: str | None,
     user_message: str | None,
     func_spec: FunctionSpec | None = None,
@@ -223,6 +224,9 @@ def query(
         print(f"Total tokens today = {spending_dict['tokens_today']}")
         print(f"Total tokens overall = {spending_dict['tokens_forever']}")
         print("-------------------------------------\n")
+
+        if tokens_now > per_run_token_limit:
+            raise ValueError(f"Exceeded token limit of {per_run_token_limit}")
 
     info = {
         "system_fingerprint": completion.system_fingerprint,

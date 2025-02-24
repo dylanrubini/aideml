@@ -162,6 +162,7 @@ class Agent:
                 user_message=None,
                 model=self.acfg.code.model,
                 temperature=self.acfg.code.temp,
+                per_run_token_limit=self.acfg.search.per_run_token_limit,
             )
 
             code = extract_code(completion_text)
@@ -322,6 +323,7 @@ class Agent:
                 func_spec=review_func_spec,
                 model=self.acfg.feedback.model,
                 temperature=self.acfg.feedback.temp,
+                per_run_token_limit=self.acfg.search.per_run_token_limit,
             ),
         )
 

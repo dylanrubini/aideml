@@ -36,6 +36,7 @@ def _setup_anthropic_client():
 
 
 def query(
+    per_run_token_limit: int,
     system_message: str | None,
     user_message: str | None,
     func_spec: FunctionSpec | None = None,
