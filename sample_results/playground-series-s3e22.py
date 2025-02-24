@@ -1,7 +1,7 @@
-import pandas as pd
 import lightgbm as lgb
-from sklearn.model_selection import StratifiedKFold
+import pandas as pd
 from sklearn.metrics import f1_score
+from sklearn.model_selection import StratifiedKFold
 
 # Load the data
 train_data = pd.read_csv("./input/train.csv")

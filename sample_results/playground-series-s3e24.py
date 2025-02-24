@@ -1,9 +1,9 @@
-import pandas as pd
 import lightgbm as lgb
-from sklearn.model_selection import train_test_split, KFold
-from sklearn.metrics import roc_auc_score
-from sklearn.preprocessing import StandardScaler
+import pandas as pd
 from bayes_opt import BayesianOptimization
+from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import KFold, train_test_split
+from sklearn.preprocessing import StandardScaler
 
 # Load the data
 train_data = pd.read_csv("./input/train.csv")
@@ -15,7 +15,9 @@ y = train_data["smoking"]
 X_test = test_data.drop("id", axis=1)
 
 # Split the data into training and validation sets
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_val, y_train, y_val = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
 # Scale the features
 scaler = StandardScaler()
@@ -77,7 +79,9 @@ param_bounds = {
 }
 
 # Perform Bayesian optimization with increased initial points and iterations
-optimizer = BayesianOptimization(f=lgb_cv, pbounds=param_bounds, random_state=42)
+optimizer = BayesianOptimization(
+    f=lgb_cv, pbounds=param_bounds, random_state=42
+)
 optimizer.maximize(init_points=10, n_iter=50)
 
 # Retrieve the best parameters

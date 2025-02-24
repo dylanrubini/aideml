@@ -1,8 +1,8 @@
 import lightgbm as lgb
-import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
+import pandas as pd
 from sklearn.metrics import mean_squared_log_error
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder
 
 # Load the data
@@ -11,7 +11,9 @@ test_df = pd.read_csv("./input/test.csv")
 
 # Feature engineering on 'release_date'
 train_df["release_date"] = pd.to_datetime(train_df["release_date"])
-test_df["release_date"] = pd.to_datetime(test_df["release_date"], errors="coerce")
+test_df["release_date"] = pd.to_datetime(
+    test_df["release_date"], errors="coerce"
+)
 
 train_df["release_year"] = train_df["release_date"].dt.year
 train_df["release_month"] = train_df["release_date"].dt.month
@@ -47,7 +49,9 @@ target = "revenue"
 # Process categorical features with one-hot encoding
 categorical_features = ["original_language"]
 encoder = OneHotEncoder(handle_unknown="ignore")
-encoded_features = encoder.fit_transform(train_df[categorical_features]).toarray()
+encoded_features = encoder.fit_transform(
+    train_df[categorical_features]
+).toarray()
 encoded_feature_names = encoder.get_feature_names_out(categorical_features)
 encoded_df = pd.DataFrame(encoded_features, columns=encoded_feature_names)
 
@@ -79,14 +83,19 @@ rmsle = np.sqrt(mean_squared_log_error(y_valid, y_pred))
 print(f"RMSLE: {rmsle}")
 
 # Prepare the test set
-test_encoded_features = encoder.transform(test_df[categorical_features]).toarray()
-test_encoded_df = pd.DataFrame(test_encoded_features, columns=encoded_feature_names)
+test_encoded_features = encoder.transform(
+    test_df[categorical_features]
+).toarray()
+test_encoded_df = pd.DataFrame(
+    test_encoded_features, columns=encoded_feature_names
+)
 # Fill missing numerical feature values with median in the test set
 for feature in features:
     if feature not in categorical_features:
         test_df[feature] = test_df[feature].fillna(train_df[feature].median())
 X_test = pd.concat(
-    [test_df[features].drop(columns=categorical_features), test_encoded_df], axis=1
+    [test_df[features].drop(columns=categorical_features), test_encoded_df],
+    axis=1,
 )
 
 # Predict on the test set

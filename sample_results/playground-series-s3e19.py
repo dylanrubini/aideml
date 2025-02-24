@@ -1,7 +1,7 @@
+import numpy as np
 import pandas as pd
 from catboost import CatBoostRegressor, Pool
 from sklearn.model_selection import KFold
-import numpy as np
 from sklearn.preprocessing import LabelEncoder
 
 
@@ -66,7 +66,9 @@ for train_index, test_index in kf.split(X):
         cat_features=cat_features,
         verbose=200,
     )
-    model.fit(X_train, y_train, eval_set=(X_valid, y_valid), use_best_model=True)
+    model.fit(
+        X_train, y_train, eval_set=(X_valid, y_valid), use_best_model=True
+    )
 
     preds = model.predict(X_valid)
     score = smape(y_valid, preds)

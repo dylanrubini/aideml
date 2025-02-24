@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.preprocessing import OneHotEncoder
 
 # Load the data
@@ -14,7 +14,9 @@ encoded_features = encoder.fit_transform(train_data[["Product ID", "Type"]])
 encoded_test_features = encoder.transform(test_data[["Product ID", "Type"]])
 
 # Add encoded features back to the dataframe
-encoded_df = pd.DataFrame(encoded_features, columns=encoder.get_feature_names_out())
+encoded_df = pd.DataFrame(
+    encoded_features, columns=encoder.get_feature_names_out()
+)
 train_data = train_data.join(encoded_df).drop(["Product ID", "Type"], axis=1)
 
 encoded_test_df = pd.DataFrame(
@@ -27,7 +29,9 @@ X = train_data.drop(["Machine failure", "id"], axis=1)
 y = train_data["Machine failure"]
 
 # Split the data into training and validation sets
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_val, y_train, y_val = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
 # Initialize the Random Forest classifier
 rf = RandomForestClassifier(random_state=42)
@@ -62,5 +66,7 @@ print(f"AUC-ROC score: {auc_roc}")
 test_predictions = best_rf.predict_proba(test_data.drop("id", axis=1))[:, 1]
 
 # Create the submission file
-submission = pd.DataFrame({"id": test_data["id"], "Machine failure": test_predictions})
+submission = pd.DataFrame(
+    {"id": test_data["id"], "Machine failure": test_predictions}
+)
 submission.to_csv("./working/submission.csv", index=False)

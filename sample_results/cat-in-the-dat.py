@@ -1,7 +1,7 @@
 import pandas as pd
 from catboost import CatBoostClassifier
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import train_test_split
 
 # Load the data
 train_data = pd.read_csv("./input/train.csv")
@@ -16,7 +16,9 @@ X_test = test_data.drop(["id"], axis=1)
 cat_features = [col for col in X.columns if X[col].dtype == "object"]
 
 # Split the data into training and validation sets
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_val, y_train, y_val = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
 # Initialize the CatBoostClassifier with a smaller number of iterations for faster grid search
 model = CatBoostClassifier(

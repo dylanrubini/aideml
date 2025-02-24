@@ -1,14 +1,18 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 from lightgbm import LGBMClassifier
 from sklearn.ensemble import (
+    GradientBoostingClassifier,
     RandomForestClassifier,
     VotingClassifier,
-    GradientBoostingClassifier,
 )
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import cross_val_score, StratifiedKFold, GridSearchCV
 from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import (
+    GridSearchCV,
+    StratifiedKFold,
+    cross_val_score,
+)
 
 # Load the data
 train_data = pd.read_csv("./input/train.csv")
@@ -53,11 +57,21 @@ model4 = GradientBoostingClassifier(random_state=42, **best_params)
 
 # Combine models into a VotingClassifier with soft voting
 voting_clf_EC1 = VotingClassifier(
-    estimators=[("lgbm", model1_EC1), ("rf", model2), ("lr", model3), ("gbc", model4)],
+    estimators=[
+        ("lgbm", model1_EC1),
+        ("rf", model2),
+        ("lr", model3),
+        ("gbc", model4),
+    ],
     voting="soft",
 )
 voting_clf_EC2 = VotingClassifier(
-    estimators=[("lgbm", model1_EC2), ("rf", model2), ("lr", model3), ("gbc", model4)],
+    estimators=[
+        ("lgbm", model1_EC2),
+        ("rf", model2),
+        ("lr", model3),
+        ("gbc", model4),
+    ],
     voting="soft",
 )
 

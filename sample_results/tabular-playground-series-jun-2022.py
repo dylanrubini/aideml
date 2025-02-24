@@ -1,7 +1,8 @@
+from math import sqrt
+
 import pandas as pd
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import mean_squared_error
-from math import sqrt
 
 # Load the data
 data = pd.read_csv("./input/data.csv")
@@ -19,9 +20,9 @@ data[cols_with_missing] = imputer.fit_transform(data[cols_with_missing])
 sample_submission = pd.read_csv("./input/sample_submission.csv")
 
 # Extract row and column to impute from the sample submission
-sample_submission[["row_id", "column"]] = sample_submission["row-col"].str.split(
-    "-", expand=True
-)
+sample_submission[["row_id", "column"]] = sample_submission[
+    "row-col"
+].str.split("-", expand=True)
 sample_submission["row_id"] = sample_submission["row_id"].astype(int)
 
 # Calculate the RMSE on the known missing values
@@ -36,4 +37,6 @@ print(f"Validation RMSE: {rmse}")
 
 # Prepare the submission file
 sample_submission["value"] = imputed_values
-sample_submission[["row-col", "value"]].to_csv("./working/submission.csv", index=False)
+sample_submission[["row-col", "value"]].to_csv(
+    "./working/submission.csv", index=False
+)

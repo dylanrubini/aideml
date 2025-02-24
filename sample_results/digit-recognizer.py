@@ -1,5 +1,5 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -12,12 +12,18 @@ from torchvision import transforms
 train_df = pd.read_csv("./input/train.csv")
 
 # Prepare the data
-X = train_df.drop("label", axis=1).values.reshape(-1, 1, 28, 28).astype("float32")
+X = (
+    train_df.drop("label", axis=1)
+    .values.reshape(-1, 1, 28, 28)
+    .astype("float32")
+)
 y = train_df["label"].values
 X /= 255.0  # Normalize to [0, 1]
 
 # Split into training and validation sets
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_val, y_train, y_val = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
 # Convert to PyTorch tensors
 X_train_tensor = torch.tensor(X_train)

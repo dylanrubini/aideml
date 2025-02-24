@@ -1,8 +1,8 @@
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import train_test_split
 
 # Load the data
 train_data = pd.read_csv("./input/train.csv")
@@ -12,7 +12,9 @@ X = train_data["comment_text"]
 y = train_data.iloc[:, 2:]
 
 # Split the data into training and validation sets
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_val, y_train, y_val = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
 # Create TF-IDF features
 tfidf_vectorizer = TfidfVectorizer(max_features=10000, stop_words="english")

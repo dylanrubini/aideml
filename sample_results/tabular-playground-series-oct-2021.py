@@ -1,7 +1,7 @@
 import lightgbm as lgb
 import pandas as pd
-from sklearn.model_selection import KFold
 from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import KFold
 
 # Load the data
 train_data = pd.read_csv("./input/train.csv")
@@ -32,7 +32,9 @@ for train_index, valid_index in kf.split(X):
         "verbosity": -1,
         "boosting_type": "gbdt",
     }
-    model = lgb.train(params, lgb_train, valid_sets=[lgb_valid], verbose_eval=False)
+    model = lgb.train(
+        params, lgb_train, valid_sets=[lgb_valid], verbose_eval=False
+    )
 
     # Predict on validation set
     y_pred = model.predict(X_valid, num_iteration=model.best_iteration)
@@ -50,7 +52,9 @@ full_train_set = lgb.Dataset(X, y)
 final_model = lgb.train(params, full_train_set)
 
 # Predict on the test set
-predictions = final_model.predict(X_test, num_iteration=final_model.best_iteration)
+predictions = final_model.predict(
+    X_test, num_iteration=final_model.best_iteration
+)
 
 # Prepare the submission file
 submission = pd.DataFrame({"id": test_data["id"], "target": predictions})

@@ -1,7 +1,7 @@
-import pandas as pd
 import lightgbm as lgb
-from sklearn.model_selection import train_test_split
+import pandas as pd
 from sklearn.metrics import log_loss
+from sklearn.model_selection import train_test_split
 
 # Read dtypes and replace 'float16' with 'float32'
 dtypes_df = pd.read_csv("./input/train_dtypes.csv")
@@ -11,7 +11,9 @@ dtypes = {
 }
 
 # Read and concatenate training data
-train_dfs = [pd.read_csv(f"./input/train_{i}.csv", dtype=dtypes) for i in range(10)]
+train_dfs = [
+    pd.read_csv(f"./input/train_{i}.csv", dtype=dtypes) for i in range(10)
+]
 train_df = pd.concat(train_dfs, ignore_index=True)
 
 # Prepare the data
@@ -30,7 +32,9 @@ X = train_df.drop(
 y = train_df[["team_A_scoring_within_10sec", "team_B_scoring_within_10sec"]]
 
 # Split the data
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_val, y_train, y_val = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
 # Train the model for team A
 model_A = lgb.LGBMClassifier()

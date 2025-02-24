@@ -1,10 +1,10 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 # Load the data
 train_data = pd.read_csv("./input/train.csv")
@@ -24,8 +24,16 @@ categorical_transformer = OneHotEncoder(handle_unknown="ignore")
 # Bundle preprocessing for numerical and categorical data
 preprocessor = ColumnTransformer(
     transformers=[
-        ("num", numerical_transformer, X.select_dtypes(exclude=["object"]).columns),
-        ("cat", categorical_transformer, X.select_dtypes(include=["object"]).columns),
+        (
+            "num",
+            numerical_transformer,
+            X.select_dtypes(exclude=["object"]).columns,
+        ),
+        (
+            "cat",
+            categorical_transformer,
+            X.select_dtypes(include=["object"]).columns,
+        ),
     ]
 )
 

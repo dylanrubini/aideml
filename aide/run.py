@@ -2,12 +2,6 @@ import atexit
 import logging
 import shutil
 
-from . import backend
-
-from .agent import Agent
-from .interpreter import Interpreter
-from .journal import Journal, Node
-from .journal2report import journal2report
 from omegaconf import OmegaConf
 from rich.columns import Columns
 from rich.console import Group
@@ -21,10 +15,21 @@ from rich.progress import (
     TextColumn,
     TimeRemainingColumn,
 )
-from rich.text import Text
 from rich.status import Status
+from rich.text import Text
 from rich.tree import Tree
-from .utils.config import load_task_desc, prep_agent_workspace, save_run, load_cfg
+
+from . import backend
+from .agent import Agent
+from .interpreter import Interpreter
+from .journal import Journal, Node
+from .journal2report import journal2report
+from .utils.config import (
+    load_cfg,
+    load_task_desc,
+    prep_agent_workspace,
+    save_run,
+)
 
 logger = logging.getLogger("aide")
 
@@ -105,7 +110,9 @@ def run():
             f"Experiment log directory:\n[yellow]▶ {str(cfg.log_dir)}",
         ]
         left = Group(
-            Panel(Text(task_desc_str.strip()), title="Task description"), prog, status
+            Panel(Text(task_desc_str.strip()), title="Task description"),
+            prog,
+            status,
         )
         right = tree
         wide = Group(*file_paths)

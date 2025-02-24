@@ -1,8 +1,8 @@
-import pandas as pd
-import numpy as np
 import lightgbm as lgb
-from sklearn.model_selection import train_test_split
+import numpy as np
+import pandas as pd
 from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
 # Load the data
@@ -18,7 +18,9 @@ X = train_data.drop(["row_id", "target"], axis=1)
 y = train_data["target"]
 
 # Split the data into training and validation sets
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_val, y_train, y_val = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
 # Create LightGBM datasets
 train_set = lgb.Dataset(X_train, label=y_train)
@@ -66,5 +68,7 @@ test_pred_max = [np.argmax(line) for line in test_pred]
 test_pred_labels = le.inverse_transform(test_pred_max)
 
 # Prepare submission
-submission = pd.DataFrame({"row_id": test_data["row_id"], "target": test_pred_labels})
+submission = pd.DataFrame(
+    {"row_id": test_data["row_id"], "target": test_pred_labels}
+)
 submission.to_csv("./working/submission.csv", index=False)

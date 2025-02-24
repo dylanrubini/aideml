@@ -1,12 +1,12 @@
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import Lasso
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
-from sklearn.impute import SimpleImputer
-from sklearn.metrics import mean_squared_error
 import numpy as np
+import pandas as pd
+from sklearn.compose import ColumnTransformer
+from sklearn.impute import SimpleImputer
+from sklearn.linear_model import Lasso
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 # Load the data
 train = pd.read_csv("./input/train.csv")
@@ -30,7 +30,10 @@ test = test.drop(["Id"], axis=1)
 
 # Preprocessing for numerical data
 numerical_transformer = Pipeline(
-    steps=[("imputer", SimpleImputer(strategy="median")), ("scaler", StandardScaler())]
+    steps=[
+        ("imputer", SimpleImputer(strategy="median")),
+        ("scaler", StandardScaler()),
+    ]
 )
 
 # Preprocessing for categorical data
@@ -44,8 +47,16 @@ categorical_transformer = Pipeline(
 # Bundle preprocessing for numerical and categorical data
 preprocessor = ColumnTransformer(
     transformers=[
-        ("num", numerical_transformer, X.select_dtypes(exclude=["object"]).columns),
-        ("cat", categorical_transformer, X.select_dtypes(include=["object"]).columns),
+        (
+            "num",
+            numerical_transformer,
+            X.select_dtypes(exclude=["object"]).columns,
+        ),
+        (
+            "cat",
+            categorical_transformer,
+            X.select_dtypes(include=["object"]).columns,
+        ),
     ]
 )
 

@@ -1,15 +1,18 @@
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
 
 # Load the training data
 train_data = pd.read_csv("./input/train.tsv", sep="\t")
 
 # Split the data into training and validation sets
 X_train, X_val, y_train, y_val = train_test_split(
-    train_data["Phrase"], train_data["Sentiment"], test_size=0.2, random_state=42
+    train_data["Phrase"],
+    train_data["Sentiment"],
+    test_size=0.2,
+    random_state=42,
 )
 
 # Initialize a TF-IDF Vectorizer

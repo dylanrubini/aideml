@@ -1,10 +1,10 @@
-import pandas as pd
-import numpy as np
-from sklearn.model_selection import KFold
-from sklearn.metrics import roc_auc_score
-from sklearn.feature_selection import RFECV
 import lightgbm as lgb
+import numpy as np
+import pandas as pd
 from bayes_opt import BayesianOptimization
+from sklearn.feature_selection import RFECV
+from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import KFold
 
 # Load the data
 train_data = pd.read_csv("./input/train.csv")
@@ -34,7 +34,9 @@ best_params = {
 lgb_model = lgb.LGBMClassifier(**best_params)
 
 # Perform feature selection using RFECV
-rfecv = RFECV(estimator=lgb_model, step=1, cv=KFold(10), scoring="roc_auc", n_jobs=-1)
+rfecv = RFECV(
+    estimator=lgb_model, step=1, cv=KFold(10), scoring="roc_auc", n_jobs=-1
+)
 rfecv.fit(X, y)
 
 # Print the optimal number of features

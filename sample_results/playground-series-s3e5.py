@@ -1,8 +1,8 @@
-import pandas as pd
-import numpy as np
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import cohen_kappa_score
 import lightgbm as lgb
+import numpy as np
+import pandas as pd
+from sklearn.metrics import cohen_kappa_score
+from sklearn.model_selection import train_test_split
 
 # Load the data
 train_data = pd.read_csv("./input/train.csv")
@@ -14,7 +14,9 @@ y = train_data["quality"]
 X_test = test_data.drop("Id", axis=1)
 
 # Split the data into training and validation sets
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_val, y_train, y_val = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
 # Train the model
 model = lgb.LGBMRegressor(random_state=42)
@@ -22,7 +24,9 @@ model.fit(X_train, y_train)
 
 # Make predictions
 val_predictions = model.predict(X_val)
-val_predictions = np.round(val_predictions).astype(int)  # Round to the nearest integer
+val_predictions = np.round(val_predictions).astype(
+    int
+)  # Round to the nearest integer
 
 # Evaluate the model
 kappa_score = cohen_kappa_score(y_val, val_predictions, weights="quadratic")

@@ -1,15 +1,17 @@
+import json
+import logging
+import os
+import shutil
+import sys
+import tempfile
+from pathlib import Path
+
 import streamlit as st
 import streamlit.components.v1 as components
-from pathlib import Path
-import tempfile
-import shutil
-import os
-import json
+from dotenv import load_dotenv
 from omegaconf import OmegaConf
 from rich.console import Console
-import sys
-from dotenv import load_dotenv
-import logging
+
 from aide import Experiment
 
 # Set up logging configuration
@@ -88,7 +90,9 @@ class WebUI:
         css_file = Path(__file__).parent / "style.css"
         if css_file.exists():
             with open(css_file) as f:
-                st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+                st.markdown(
+                    f"<style>{f.read()}</style>", unsafe_allow_html=True
+                )
         else:
             st.warning(f"CSS file not found at: {css_file}")
 
@@ -173,7 +177,9 @@ class WebUI:
 
             # Only show example button if no files are uploaded
             if st.button(
-                "Load Example Experiment", type="primary", use_container_width=True
+                "Load Example Experiment",
+                type="primary",
+                use_container_width=True,
             ):
                 st.session_state.example_files = self.load_example_files()
 
@@ -270,7 +276,9 @@ class WebUI:
             if not input_dir:
                 return None
 
-            experiment = self.initialize_experiment(input_dir, goal_text, eval_text)
+            experiment = self.initialize_experiment(
+                input_dir, goal_text, eval_text
+            )
 
             # Create separate placeholders for progress and config
             progress_placeholder = results_col.empty()
@@ -292,7 +300,9 @@ class WebUI:
                 if step == 0:
                     with config_placeholder.container():
                         st.markdown("### 📋 Configuration")
-                        st.code(OmegaConf.to_yaml(experiment.cfg), language="yaml")
+                        st.code(
+                            OmegaConf.to_yaml(experiment.cfg), language="yaml"
+                        )
 
                 experiment.run(steps=1)
 
@@ -379,7 +389,9 @@ class WebUI:
         Returns:
             Experiment: The initialized Experiment object.
         """
-        experiment = Experiment(data_dir=str(input_dir), goal=goal_text, eval=eval_text)
+        experiment = Experiment(
+            data_dir=str(input_dir), goal=goal_text, eval=eval_text
+        )
         return experiment
 
     @staticmethod
@@ -518,7 +530,10 @@ class WebUI:
             metrics = []
 
             for node in journal_data:
-                if node["metric"] is not None and node["metric"].lower() != "none":
+                if (
+                    node["metric"] is not None
+                    and node["metric"].lower() != "none"
+                ):
                     try:
                         metric_value = float(node["metric"])
                         steps.append(node["step"])
@@ -552,7 +567,9 @@ class WebUI:
                 )
 
                 # Only keep the key for plotly_chart
-                st.plotly_chart(fig, use_container_width=True, key=f"plot_{step}")
+                st.plotly_chart(
+                    fig, use_container_width=True, key=f"plot_{step}"
+                )
             else:
                 st.info("No validation metrics available to plot")
 
@@ -591,7 +608,9 @@ class WebUI:
             best_metric = self.get_best_metric(results)
             if best_metric is not None:
                 st.metric("Best Validation Score", f"{best_metric:.4f}")
-            self.render_validation_plot(results, step=st.session_state.current_step)
+            self.render_validation_plot(
+                results, step=st.session_state.current_step
+            )
 
 
 if __name__ == "__main__":

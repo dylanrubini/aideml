@@ -6,6 +6,7 @@ from pathlib import Path
 
 import numpy as np
 from igraph import Graph
+
 from ..journal import Journal
 
 
@@ -31,7 +32,9 @@ def generate_layout(n_nodes, edges, layout_type="rt"):
 
 def normalize_layout(layout: np.ndarray):
     """Normalize layout to [0, 1]"""
-    layout = (layout - layout.min(axis=0)) / (layout.max(axis=0) - layout.min(axis=0))
+    layout = (layout - layout.min(axis=0)) / (
+        layout.max(axis=0) - layout.min(axis=0)
+    )
     layout[:, 1] = 1 - layout[:, 1]
     layout[:, 1] = np.nan_to_num(layout[:, 1], nan=0)
     layout[:, 0] = np.nan_to_num(layout[:, 0], nan=0.5)

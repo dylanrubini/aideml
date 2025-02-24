@@ -1,8 +1,8 @@
-import pandas as pd
 import lightgbm as lgb
+import pandas as pd
+from sklearn.metrics import log_loss
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
-from sklearn.metrics import log_loss
 
 # Load the data
 train_data = pd.read_csv("./input/train.csv")

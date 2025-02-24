@@ -1,8 +1,8 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 from lightgbm import LGBMRegressor
-from sklearn.model_selection import KFold
 from sklearn.metrics import mean_absolute_error
+from sklearn.model_selection import KFold
 
 # Load the data
 train_data = pd.read_csv("./input/train.csv")

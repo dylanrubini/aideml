@@ -1,8 +1,8 @@
-import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
+import pandas as pd
 from lightgbm import LGBMRegressor
 from sklearn.metrics import mean_squared_log_error
+from sklearn.model_selection import train_test_split
 
 # Load the data
 train = pd.read_csv("./input/train.csv")
@@ -27,7 +27,9 @@ def preprocess_data(data):
     data["month_sin"] = np.sin((data.month - 1) * (2.0 * np.pi / 12))
     data["month_cos"] = np.cos((data.month - 1) * (2.0 * np.pi / 12))
 
-    return data.drop(["datetime", "casual", "registered"], axis=1, errors="ignore")
+    return data.drop(
+        ["datetime", "casual", "registered"], axis=1, errors="ignore"
+    )
 
 
 train = preprocess_data(train)
@@ -36,7 +38,9 @@ test = preprocess_data(test)
 # Splitting the training data for validation
 X = train.drop(["count"], axis=1)
 y = np.log1p(train["count"])  # Apply log1p to transform the target variable
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_val, y_train, y_val = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
 # Model training
 model = LGBMRegressor(n_estimators=100, learning_rate=0.05, random_state=42)

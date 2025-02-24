@@ -1,8 +1,8 @@
+import numpy as np
 import pandas as pd
 from catboost import CatBoostRegressor
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
-import numpy as np
+from sklearn.model_selection import train_test_split
 
 # Load the data
 train_data = pd.read_csv("./input/train.csv")
@@ -13,10 +13,14 @@ X = train_data.drop(["id", "target"], axis=1)
 y = train_data["target"]
 
 # Split data into training and validation sets
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_val, y_train, y_val = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
 # Identify categorical features
-cat_features = [col for col in X_train.columns if X_train[col].dtype == "object"]
+cat_features = [
+    col for col in X_train.columns if X_train[col].dtype == "object"
+]
 
 # Define hyperparameter space
 learning_rates = [0.03, 0.1]

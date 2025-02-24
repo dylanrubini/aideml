@@ -1,8 +1,8 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 from lightgbm import LGBMRegressor
-from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.metrics import mean_squared_log_error
+from sklearn.model_selection import RandomizedSearchCV, train_test_split
 
 # Load the datasets
 train = pd.read_csv("./input/train.csv")
@@ -25,7 +25,9 @@ for df in [train, test]:
 # Creating interaction terms between sensor readings and weather features
 for sensor in ["sensor_1", "sensor_2", "sensor_3", "sensor_4", "sensor_5"]:
     for weather in ["deg_C", "relative_humidity", "absolute_humidity"]:
-        train[f"{sensor}_{weather}_interaction"] = train[sensor] * train[weather]
+        train[f"{sensor}_{weather}_interaction"] = (
+            train[sensor] * train[weather]
+        )
         test[f"{sensor}_{weather}_interaction"] = test[sensor] * test[weather]
 
 # Update features list to include the new interaction terms

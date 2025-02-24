@@ -21,7 +21,9 @@ for n_clusters in range_n_clusters:
     silhouette_scores.append(silhouette_avg)
 
 # Select the number of clusters with the highest silhouette score
-optimal_n_clusters = range_n_clusters[silhouette_scores.index(max(silhouette_scores))]
+optimal_n_clusters = range_n_clusters[
+    silhouette_scores.index(max(silhouette_scores))
+]
 
 # Fit the KMeans model with the optimal number of clusters
 kmeans = KMeans(n_clusters=optimal_n_clusters, random_state=42)

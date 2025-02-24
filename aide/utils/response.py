@@ -64,7 +64,9 @@ def extract_code(text):
 
     # When the entire text is code or backticks of the code block is missing
     if len(parsed_codes) == 0:
-        matches = re.findall(r"^(```(python)?)?\n?(.*?)\n?(```)?$", text, re.DOTALL)
+        matches = re.findall(
+            r"^(```(python)?)?\n?(.*?)\n?(```)?$", text, re.DOTALL
+        )
         if matches:
             code_block = matches[0][2]
             parsed_codes.append(code_block)

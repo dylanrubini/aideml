@@ -1,8 +1,9 @@
+from math import sqrt
+
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
-from math import sqrt
+from sklearn.model_selection import train_test_split
 
 # Load the data
 games = pd.read_csv("./input/games.csv")
@@ -22,7 +23,9 @@ X = merged_data[["game_duration_seconds", "winner", "points"]]
 y = merged_data["rating"]
 
 # Split the data into training and validation sets
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_val, y_train, y_val = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
 # Initialize the model
 model = RandomForestRegressor(n_estimators=100, random_state=42)

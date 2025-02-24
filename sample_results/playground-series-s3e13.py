@@ -24,7 +24,9 @@ X_train, X_val, y_train, y_val = train_test_split(
 )
 
 # Train the model
-model = OneVsRestClassifier(RandomForestClassifier(n_estimators=100, random_state=42))
+model = OneVsRestClassifier(
+    RandomForestClassifier(n_estimators=100, random_state=42)
+)
 model.fit(X_train, y_train)
 
 # Predict on the validation set

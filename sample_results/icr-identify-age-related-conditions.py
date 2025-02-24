@@ -1,9 +1,9 @@
-import pandas as pd
 import lightgbm as lgb
-from sklearn.model_selection import RandomizedSearchCV, KFold
-from sklearn.metrics import log_loss, make_scorer
-from sklearn.preprocessing import LabelEncoder
 import numpy as np
+import pandas as pd
+from sklearn.metrics import log_loss, make_scorer
+from sklearn.model_selection import KFold, RandomizedSearchCV
+from sklearn.preprocessing import LabelEncoder
 
 # Load the data
 train_data = pd.read_csv("./input/train.csv")
@@ -20,7 +20,9 @@ y = train_data["Class"]
 X_test = test_data.drop("Id", axis=1)
 
 # Define the model parameters and parameter grid for randomized search
-model = lgb.LGBMClassifier(objective="binary", boosting_type="gbdt", is_unbalance=True)
+model = lgb.LGBMClassifier(
+    objective="binary", boosting_type="gbdt", is_unbalance=True
+)
 param_grid = {
     "learning_rate": [0.01, 0.05, 0.1],
     "num_leaves": [15, 31, 63],
@@ -32,7 +34,9 @@ param_grid = {
 }
 
 # Create a scorer for log loss
-log_loss_scorer = make_scorer(log_loss, greater_is_better=False, needs_proba=True)
+log_loss_scorer = make_scorer(
+    log_loss, greater_is_better=False, needs_proba=True
+)
 
 # Perform randomized search with cross-validation
 random_search = RandomizedSearchCV(

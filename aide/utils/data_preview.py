@@ -11,7 +11,17 @@ from genson import SchemaBuilder
 from pandas.api.types import is_numeric_dtype
 
 # these files are treated as code (e.g. markdown wrapped)
-code_files = {".py", ".sh", ".yaml", ".yml", ".md", ".html", ".xml", ".log", ".rst"}
+code_files = {
+    ".py",
+    ".sh",
+    ".yaml",
+    ".yml",
+    ".md",
+    ".html",
+    ".xml",
+    ".log",
+    ".rst",
+}
 # we treat these files as text (rather than binary) files
 plaintext_files = {".txt", ".csv", ".json", ".tsv"} | code_files
 
@@ -71,7 +81,9 @@ def preview_csv(p: Path, file_name: str, simple=True) -> str:
 
     out = []
 
-    out.append(f"-> {file_name} has {df.shape[0]} rows and {df.shape[1]} columns.")
+    out.append(
+        f"-> {file_name} has {df.shape[0]} rows and {df.shape[1]} columns."
+    )
 
     if simple:
         cols = df.columns.tolist()
@@ -91,7 +103,9 @@ def preview_csv(p: Path, file_name: str, simple=True) -> str:
 
             if dtype == "bool":
                 v = df[col][df[col].notnull()].mean()
-                out.append(f"{name} is {v*100:.2f}% True, {100-v*100:.2f}% False")
+                out.append(
+                    f"{name} is {v*100:.2f}% True, {100-v*100:.2f}% False"
+                )
             elif df[col].nunique() < 10:
                 out.append(
                     f"{name} has {df[col].nunique()} unique values: {df[col].unique().tolist()}"
@@ -113,8 +127,9 @@ def preview_json(p: Path, file_name: str):
     builder = SchemaBuilder()
     with open(p) as f:
         builder.add_object(json.load(f))
-    return f"-> {file_name} has auto-generated json schema:\n" + builder.to_json(
-        indent=2
+    return (
+        f"-> {file_name} has auto-generated json schema:\n"
+        + builder.to_json(indent=2)
     )
 
 

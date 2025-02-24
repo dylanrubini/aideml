@@ -1,8 +1,8 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.svm import SVR
 from sklearn.metrics import median_absolute_error
-from sklearn.preprocessing import StandardScaler, PolynomialFeatures
+from sklearn.model_selection import GridSearchCV, train_test_split
+from sklearn.preprocessing import PolynomialFeatures, StandardScaler
+from sklearn.svm import SVR
 
 # Load the dataset
 train_data = pd.read_csv("./input/train.csv")
@@ -12,7 +12,9 @@ X = train_data.drop(["id", "Hardness"], axis=1)
 y = train_data["Hardness"]
 
 # Splitting the dataset into training and validation sets
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_val, y_train, y_val = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
 # Create interaction terms
 poly = PolynomialFeatures(degree=2, interaction_only=True, include_bias=False)
@@ -36,7 +38,12 @@ param_grid = {
 
 # Initialize GridSearchCV
 grid_search = GridSearchCV(
-    svr, param_grid, cv=5, scoring="neg_median_absolute_error", verbose=1, n_jobs=-1
+    svr,
+    param_grid,
+    cv=5,
+    scoring="neg_median_absolute_error",
+    verbose=1,
+    n_jobs=-1,
 )
 
 # Fit the model

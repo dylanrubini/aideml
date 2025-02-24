@@ -1,7 +1,7 @@
 import pandas as pd
 from catboost import CatBoostRegressor
-from sklearn.model_selection import KFold
 from sklearn.metrics import mean_absolute_error
+from sklearn.model_selection import KFold
 from sklearn.preprocessing import PolynomialFeatures
 
 # Load the data
@@ -22,18 +22,25 @@ def generate_poly_features(
     selected_features = df[feature_names]
     poly_features_array = poly_features.fit_transform(selected_features)
     poly_feature_names = [
-        prefix + name for name in poly_features.get_feature_names_out(feature_names)
+        prefix + name
+        for name in poly_features.get_feature_names_out(feature_names)
     ]
     return pd.DataFrame(poly_features_array, columns=poly_feature_names)
 
 
 # Apply polynomial feature generation to both train and test datasets
-poly_features_train = generate_poly_features(X, ["Length", "Diameter", "Height"])
-poly_features_test = generate_poly_features(test_X, ["Length", "Diameter", "Height"])
+poly_features_train = generate_poly_features(
+    X, ["Length", "Diameter", "Height"]
+)
+poly_features_test = generate_poly_features(
+    test_X, ["Length", "Diameter", "Height"]
+)
 
 # Concatenate the polynomial features with the original dataset
 X_poly = pd.concat([X.reset_index(drop=True), poly_features_train], axis=1)
-test_X_poly = pd.concat([test_X.reset_index(drop=True), poly_features_test], axis=1)
+test_X_poly = pd.concat(
+    [test_X.reset_index(drop=True), poly_features_test], axis=1
+)
 
 # Specify categorical features
 cat_features = ["Sex"]

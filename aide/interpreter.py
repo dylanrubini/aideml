@@ -156,7 +156,9 @@ class Interpreter:
                 if e_cls_name == "KeyboardInterrupt":
                     e_cls_name = "TimeoutError"
 
-                event_outq.put(("state:finished", e_cls_name, exc_info, exc_stack))
+                event_outq.put(
+                    ("state:finished", e_cls_name, exc_info, exc_stack)
+                )
             else:
                 event_outq.put(("state:finished", None, None, None))
 
@@ -172,7 +174,11 @@ class Interpreter:
         # - result_outq: receive stdout/stderr from child
         # - event_outq: receive events from child (e.g. state:ready, state:finished)
         # trunk-ignore(mypy/var-annotated)
-        self.code_inq, self.result_outq, self.event_outq = Queue(), Queue(), Queue()
+        self.code_inq, self.result_outq, self.event_outq = (
+            Queue(),
+            Queue(),
+            Queue(),
+        )
         self.process = Process(
             target=self._run_session,
             args=(self.code_inq, self.result_outq, self.event_outq),
@@ -188,7 +194,9 @@ class Interpreter:
             self.process.join(timeout=0.5)
 
             if self.process.exitcode is None:
-                logger.warning("Process failed to terminate, killing immediately")
+                logger.warning(
+                    "Process failed to terminate, killing immediately"
+                )
                 self.process.kill()
                 self.process.join(timeout=0.5)
 
@@ -237,7 +245,9 @@ class Interpreter:
             msg = "REPL child process failed to start execution"
             logger.critical(msg)
             while not self.result_outq.empty():
-                logger.error(f"REPL output queue dump: {self.result_outq.get()}")
+                logger.error(
+                    f"REPL output queue dump: {self.result_outq.get()}"
+                )
             raise RuntimeError(msg) from None
         assert state[0] == "state:ready", state
         start_time = time.time()
@@ -249,7 +259,9 @@ class Interpreter:
         while True:
             try:
                 # check if the child is done
-                state = self.event_outq.get(timeout=1)  # wait for state:finished
+                state = self.event_outq.get(
+                    timeout=1
+                )  # wait for state:finished
                 assert state[0] == "state:finished", state
                 exec_time = time.time() - start_time
                 break
@@ -269,13 +281,17 @@ class Interpreter:
                     continue
                 running_time = time.time() - start_time
                 if running_time > self.timeout:
-                    logger.warning(f"Execution exceeded timeout of {self.timeout}s")
+                    logger.warning(
+                        f"Execution exceeded timeout of {self.timeout}s"
+                    )
                     os.kill(self.process.pid, signal.SIGINT)
                     child_in_overtime = True
 
                     # terminate if we're overtime by more than 5 seconds
                     if running_time > self.timeout + 5:
-                        logger.warning("Child failed to terminate, killing it..")
+                        logger.warning(
+                            "Child failed to terminate, killing it.."
+                        )
                         self.cleanup_session()
 
                         state = (None, "TimeoutError", {}, [])
@@ -287,7 +303,11 @@ class Interpreter:
         # waiting until the queue is empty is not enough since
         # the feeder thread in child might still be adding to the queue
         start_collect = time.time()
-        while not self.result_outq.empty() or not output or output[-1] != "<|EOF|>":
+        while (
+            not self.result_outq.empty()
+            or not output
+            or output[-1] != "<|EOF|>"
+        ):
             try:
                 # Add 5-second timeout for output collection
                 if time.time() - start_collect > 5:
@@ -308,4 +328,6 @@ class Interpreter:
             output.append(
                 f"Execution time: {humanize.naturaldelta(exec_time)} seconds (time limit is {humanize.naturaldelta(self.timeout)})."
             )
-        return ExecutionResult(output, exec_time, e_cls_name, exc_info, exc_stack)
+        return ExecutionResult(
+            output, exec_time, e_cls_name, exc_info, exc_stack
+        )

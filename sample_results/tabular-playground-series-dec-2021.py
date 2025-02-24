@@ -1,7 +1,7 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
 
 # Load the data
 train_data = pd.read_csv("./input/train.csv")
@@ -12,7 +12,9 @@ X = train_data.drop(columns=["Id", "Cover_Type"])
 y = train_data["Cover_Type"]
 
 # Split the data into training and validation sets
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_val, y_train, y_val = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
 # Initialize and train the Random Forest Classifier
 model = RandomForestClassifier(random_state=42)
@@ -27,5 +29,7 @@ print(f"Validation Accuracy: {accuracy}")
 test_predictions = model.predict(test_data.drop(columns=["Id"]))
 
 # Save the predictions to a CSV file
-submission = pd.DataFrame({"Id": test_data["Id"], "Cover_Type": test_predictions})
+submission = pd.DataFrame(
+    {"Id": test_data["Id"], "Cover_Type": test_predictions}
+)
 submission.to_csv("./working/submission.csv", index=False)

@@ -17,7 +17,9 @@ test_features = test_data.groupby("sequence").agg(agg_funcs)
 train_features.columns = [
     "_".join(col).strip() for col in train_features.columns.values
 ]
-test_features.columns = ["_".join(col).strip() for col in test_features.columns.values]
+test_features.columns = [
+    "_".join(col).strip() for col in test_features.columns.values
+]
 
 # Split the data into train and validation sets
 X_train, X_val, y_train, y_val = train_test_split(
@@ -39,5 +41,7 @@ print(f"AUC-ROC score: {auc_score}")
 test_probs = rf.predict_proba(test_features)[:, 1]
 
 # Create the submission file
-submission = pd.DataFrame({"sequence": test_features.index, "state": test_probs})
+submission = pd.DataFrame(
+    {"sequence": test_features.index, "state": test_probs}
+)
 submission.to_csv("./working/submission.csv", index=False)

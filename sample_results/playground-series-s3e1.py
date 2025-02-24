@@ -1,8 +1,8 @@
 import lightgbm as lgb
-import pandas as pd
-from sklearn.model_selection import KFold
-from sklearn.metrics import mean_squared_error
 import numpy as np
+import pandas as pd
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import KFold
 
 # Load the data
 train_data = pd.read_csv("./input/train.csv")
@@ -48,7 +48,9 @@ full_train_set = lgb.Dataset(X, label=y)
 final_model = lgb.train(params, full_train_set, verbose_eval=False)
 
 # Predict on the test set
-predictions = final_model.predict(X_test, num_iteration=final_model.best_iteration)
+predictions = final_model.predict(
+    X_test, num_iteration=final_model.best_iteration
+)
 
 # Prepare the submission file
 submission = pd.DataFrame({"id": test_data["id"], "MedHouseVal": predictions})

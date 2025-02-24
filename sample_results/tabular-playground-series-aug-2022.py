@@ -1,9 +1,9 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split
+from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder
-from sklearn.impute import SimpleImputer
 
 # Load the data
 train_data = pd.read_csv("./input/train.csv")
@@ -25,10 +25,12 @@ X_test[num_cols] = imputer.transform(X_test[num_cols])
 cat_cols = X.select_dtypes(include="object").columns
 encoder = OneHotEncoder(handle_unknown="ignore", sparse=False)
 X_encoded = pd.DataFrame(
-    encoder.fit_transform(X[cat_cols]), columns=encoder.get_feature_names_out(cat_cols)
+    encoder.fit_transform(X[cat_cols]),
+    columns=encoder.get_feature_names_out(cat_cols),
 )
 X_test_encoded = pd.DataFrame(
-    encoder.transform(X_test[cat_cols]), columns=encoder.get_feature_names_out(cat_cols)
+    encoder.transform(X_test[cat_cols]),
+    columns=encoder.get_feature_names_out(cat_cols),
 )
 
 # One-hot encoding removed index; put it back

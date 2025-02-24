@@ -1,17 +1,19 @@
 import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import cross_val_score
-from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import ColumnTransformer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.impute import SimpleImputer
+from sklearn.model_selection import cross_val_score
 from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder
 
 # Load the data
 train_data = pd.read_csv("./input/train.csv")
 test_data = pd.read_csv("./input/test.csv")
 
 # Features and target
-X = train_data.drop(["Survived", "PassengerId", "Name", "Ticket", "Cabin"], axis=1)
+X = train_data.drop(
+    ["Survived", "PassengerId", "Name", "Ticket", "Cabin"], axis=1
+)
 y = train_data["Survived"]
 
 # Preprocessing for numerical data
@@ -50,5 +52,7 @@ test_X = test_data.drop(["PassengerId", "Name", "Ticket", "Cabin"], axis=1)
 test_preds = clf.predict(test_X)
 
 # Save test predictions to file
-output = pd.DataFrame({"PassengerId": test_data.PassengerId, "Survived": test_preds})
+output = pd.DataFrame(
+    {"PassengerId": test_data.PassengerId, "Survived": test_preds}
+)
 output.to_csv("./working/submission.csv", index=False)

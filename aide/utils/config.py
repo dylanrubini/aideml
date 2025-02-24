@@ -1,23 +1,25 @@
 """configuration and setup utils"""
 
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Hashable, cast
 
 import coolname
 import rich
-from omegaconf import OmegaConf
-from rich.syntax import Syntax
 import shutup
+from omegaconf import OmegaConf
 from rich.logging import RichHandler
-import logging
+from rich.syntax import Syntax
 
-from . import tree_export
-from . import copytree, preproc_data, serialize
+from . import copytree, preproc_data, serialize, tree_export
 
 shutup.mute_warnings()
 logging.basicConfig(
-    level="WARNING", format="%(message)s", datefmt="[%X]", handlers=[RichHandler()]
+    level="WARNING",
+    format="%(message)s",
+    datefmt="[%X]",
+    handlers=[RichHandler()],
 )
 logger = logging.getLogger("aide")
 logger.setLevel(logging.WARNING)
@@ -130,7 +132,9 @@ def prep_cfg(cfg: Config):
     top_workspace_dir.mkdir(parents=True, exist_ok=True)
 
     # generate experiment name and prefix with consecutive index
-    ind = max(_get_next_logindex(top_log_dir), _get_next_logindex(top_workspace_dir))
+    ind = max(
+        _get_next_logindex(top_log_dir), _get_next_logindex(top_workspace_dir)
+    )
     cfg.exp_name = cfg.exp_name or coolname.generate_slug(3)
     cfg.exp_name = f"{ind}-{cfg.exp_name}"
 
@@ -179,7 +183,11 @@ def prep_agent_workspace(cfg: Config):
     (cfg.workspace_dir / "input").mkdir(parents=True, exist_ok=True)
     (cfg.workspace_dir / "working").mkdir(parents=True, exist_ok=True)
 
-    copytree(cfg.data_dir, cfg.workspace_dir / "input", use_symlinks=not cfg.copy_data)
+    copytree(
+        cfg.data_dir,
+        cfg.workspace_dir / "input",
+        use_symlinks=not cfg.copy_data,
+    )
     if cfg.preprocess_data:
         preproc_data(cfg.workspace_dir / "input")
 

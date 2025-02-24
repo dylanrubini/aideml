@@ -1,16 +1,20 @@
+import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
-import numpy as np
 
 # Load a subset of the training data
 train_df = pd.read_csv("./input/train.csv", nrows=500000)
 
 # Remove missing values and outliers
 train_df = train_df.dropna(how="any", axis="rows")
-train_df = train_df[(train_df.fare_amount >= 2.5) & (train_df.fare_amount <= 500)]
-train_df = train_df[(train_df.passenger_count > 0) & (train_df.passenger_count <= 6)]
+train_df = train_df[
+    (train_df.fare_amount >= 2.5) & (train_df.fare_amount <= 500)
+]
+train_df = train_df[
+    (train_df.passenger_count > 0) & (train_df.passenger_count <= 6)
+]
 train_df = train_df[
     (train_df["pickup_latitude"] != 0) | (train_df["pickup_longitude"] != 0)
 ]
@@ -68,7 +72,9 @@ X = train_df[features]
 y = train_df[target]
 
 # Split the data into training and validation sets
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_val, y_train, y_val = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
 # Train the model
 rf = RandomForestRegressor(n_estimators=50, max_depth=25, random_state=42)

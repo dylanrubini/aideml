@@ -1,9 +1,9 @@
-import pandas as pd
 import lightgbm as lgb
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_absolute_error
-from sklearn.preprocessing import OneHotEncoder
 import numpy as np
+import pandas as pd
+from sklearn.metrics import mean_absolute_error
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OneHotEncoder
 
 # Load the data
 train_data = pd.read_csv("./input/train.csv")
@@ -32,11 +32,17 @@ test_encoded = ohe.transform(test_data[["country", "store", "product"]])
 
 # Prepare the final train and test sets
 X_train = np.hstack(
-    (train_data[["year", "month", "day", "dayofweek", "is_weekend"]], train_encoded)
+    (
+        train_data[["year", "month", "day", "dayofweek", "is_weekend"]],
+        train_encoded,
+    )
 )
 y_train = train_data["num_sold"]
 X_test = np.hstack(
-    (test_data[["year", "month", "day", "dayofweek", "is_weekend"]], test_encoded)
+    (
+        test_data[["year", "month", "day", "dayofweek", "is_weekend"]],
+        test_encoded,
+    )
 )
 
 # Split the training data into training and validation sets
@@ -68,5 +74,7 @@ model.fit(X_train, y_train)
 test_predictions = model.predict(X_test)
 
 # Save the predictions to a CSV file
-submission = pd.DataFrame({"row_id": test_data["row_id"], "num_sold": test_predictions})
+submission = pd.DataFrame(
+    {"row_id": test_data["row_id"], "num_sold": test_predictions}
+)
 submission.to_csv("./working/submission.csv", index=False)

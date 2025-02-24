@@ -1,5 +1,5 @@
-import pandas as pd
 import lightgbm as lgb
+import pandas as pd
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 
@@ -30,7 +30,9 @@ test_data = test_data.reindex(columns=train_data.columns, fill_value=0)
 # Prepare the data for training
 X = train_data.drop(columns=["emission", "ID_LAT_LON_YEAR_WEEK", "ID"])
 y = train_data["emission"]
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_val, y_train, y_val = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
 # Train the LightGBM model
 lgb_train = lgb.Dataset(X_train, y_train)
@@ -54,7 +56,11 @@ rmse = mean_squared_error(y_val, y_pred, squared=False)
 print(f"Validation RMSE: {rmse}")
 
 # Predict on test set and save submission
-test_features = test_data.drop(columns=["ID_LAT_LON_YEAR_WEEK", "ID", "emission"])
-test_data["emission"] = gbm.predict(test_features, num_iteration=gbm.best_iteration)
+test_features = test_data.drop(
+    columns=["ID_LAT_LON_YEAR_WEEK", "ID", "emission"]
+)
+test_data["emission"] = gbm.predict(
+    test_features, num_iteration=gbm.best_iteration
+)
 submission = test_data[["ID_LAT_LON_YEAR_WEEK", "emission"]]
 submission.to_csv("./working/submission.csv", index=False)

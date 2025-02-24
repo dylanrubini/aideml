@@ -1,11 +1,11 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
-from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import ColumnTransformer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.impute import SimpleImputer
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder
 
 # Load the data
 train_data = pd.read_csv("./input/train.csv")
@@ -74,5 +74,7 @@ preprocessed_test_data = clf.named_steps["preprocessor"].transform(test_data)
 test_preds = clf.named_steps["model"].predict(preprocessed_test_data)
 
 # Save test predictions to file
-output = pd.DataFrame({"PassengerId": test_data.PassengerId, "Transported": test_preds})
+output = pd.DataFrame(
+    {"PassengerId": test_data.PassengerId, "Transported": test_preds}
+)
 output.to_csv("./working/submission.csv", index=False)

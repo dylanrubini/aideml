@@ -1,10 +1,10 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 import torch
 import torch.nn as nn
-from torch.utils.data import Dataset, DataLoader
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import train_test_split
+from torch.utils.data import DataLoader, Dataset
 
 # Load the data
 train_df = pd.read_csv("./input/training/training.csv")
@@ -12,14 +12,18 @@ train_df.dropna(inplace=True)  # Remove missing values for simplicity
 
 # Preprocess the data
 X = (
-    np.vstack(train_df["Image"].apply(lambda x: np.fromstring(x, sep=" ")).values)
+    np.vstack(
+        train_df["Image"].apply(lambda x: np.fromstring(x, sep=" ")).values
+    )
     / 255.0
 )  # Normalize pixel values
 X = X.reshape(-1, 96, 96, 1)
 y = train_df.drop(["Image"], axis=1).values
 
 # Train-test split
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_val, y_train, y_val = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
 
 # Define dataset
@@ -32,7 +36,9 @@ class FacesDataset(Dataset):
         return len(self.images)
 
     def __getitem__(self, idx):
-        image = torch.tensor(self.images[idx], dtype=torch.float32).permute(2, 0, 1)
+        image = torch.tensor(self.images[idx], dtype=torch.float32).permute(
+            2, 0, 1
+        )
         keypoint = torch.tensor(self.keypoints[idx], dtype=torch.float32)
         return image, keypoint
 

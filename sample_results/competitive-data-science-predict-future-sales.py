@@ -1,7 +1,7 @@
-import pandas as pd
 import numpy as np
-from sklearn.metrics import mean_squared_error
+import pandas as pd
 from lightgbm import LGBMRegressor
+from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 
 # Load data
@@ -31,13 +31,20 @@ for lag in [1, 2, 3]:
         columns={"item_cnt_month": f"item_cnt_month_lag_{lag}"}, inplace=True
     )
     monthly_sales = pd.merge(
-        monthly_sales, shifted, on=["year", "month", "shop_id", "item_id"], how="left"
+        monthly_sales,
+        shifted,
+        on=["year", "month", "shop_id", "item_id"],
+        how="left",
     )
 
 # Mean encoded features
-item_mean = monthly_sales.groupby("item_id")["item_cnt_month"].mean().reset_index()
+item_mean = (
+    monthly_sales.groupby("item_id")["item_cnt_month"].mean().reset_index()
+)
 item_mean.rename(columns={"item_cnt_month": "item_mean_cnt"}, inplace=True)
-shop_mean = monthly_sales.groupby("shop_id")["item_cnt_month"].mean().reset_index()
+shop_mean = (
+    monthly_sales.groupby("shop_id")["item_cnt_month"].mean().reset_index()
+)
 shop_mean.rename(columns={"item_cnt_month": "shop_mean_cnt"}, inplace=True)
 
 monthly_sales = pd.merge(monthly_sales, item_mean, on="item_id", how="left")
@@ -48,7 +55,9 @@ X = monthly_sales.drop(["item_cnt_month", "year", "month"], axis=1)
 y = monthly_sales["item_cnt_month"].clip(0, 20)
 
 # Train/test split
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_val, y_train, y_val = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
 # Model training
 model = LGBMRegressor()

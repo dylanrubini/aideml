@@ -5,8 +5,8 @@ from sklearn.ensemble import (
     StackingRegressor,
 )
 from sklearn.linear_model import LinearRegression, RidgeCV
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 # Load the data
@@ -19,7 +19,9 @@ y = train_data["yield"]
 X_test = test_data.drop("id", axis=1)
 
 # Split the data into training and validation sets
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_val, y_train, y_val = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
 # Scale the features
 scaler = StandardScaler()
@@ -40,7 +42,9 @@ estimators = [
 ]
 
 # Initialize the StackingRegressor with a RidgeCV final estimator
-stacking_regressor = StackingRegressor(estimators=estimators, final_estimator=RidgeCV())
+stacking_regressor = StackingRegressor(
+    estimators=estimators, final_estimator=RidgeCV()
+)
 
 # Train the StackingRegressor on the scaled training data
 stacking_regressor.fit(X_train_scaled, y_train)

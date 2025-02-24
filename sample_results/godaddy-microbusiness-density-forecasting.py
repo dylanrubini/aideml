@@ -1,11 +1,11 @@
 import pandas as pd
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import cross_val_score, KFold, GridSearchCV
-from sklearn.metrics import make_scorer
-from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.impute import SimpleImputer
+from sklearn.metrics import make_scorer
+from sklearn.model_selection import GridSearchCV, KFold, cross_val_score
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder
 
 # Load the data
 train_data = pd.read_csv("./input/train.csv")
@@ -20,9 +20,9 @@ test_data = test_data.merge(census_data, on="cfips", how="left")
 numerical_transformer = SimpleImputer(strategy="median")
 
 # Columns to be used as features
-feature_columns = train_data.select_dtypes(exclude=["object", "datetime"]).columns.drop(
-    "microbusiness_density"
-)
+feature_columns = train_data.select_dtypes(
+    exclude=["object", "datetime"]
+).columns.drop("microbusiness_density")
 
 # Bundle preprocessing for numerical and categorical data
 preprocessor = ColumnTransformer(
@@ -61,7 +61,9 @@ grid_search = GridSearchCV(
 )
 
 # Fit the grid search to the data
-grid_search.fit(train_data[feature_columns], train_data["microbusiness_density"])
+grid_search.fit(
+    train_data[feature_columns], train_data["microbusiness_density"]
+)
 
 # Print the best parameters and the corresponding SMAPE score
 print(f"Best parameters: {grid_search.best_params_}")
@@ -69,9 +71,13 @@ print(f"Best SMAPE score: {-grid_search.best_score_}")
 
 # Fit the model with the best parameters and make predictions on the test set
 best_pipeline = grid_search.best_estimator_
-best_pipeline.fit(train_data[feature_columns], train_data["microbusiness_density"])
+best_pipeline.fit(
+    train_data[feature_columns], train_data["microbusiness_density"]
+)
 test_preds = best_pipeline.predict(test_data[feature_columns])
 
 # Save test predictions to file
-output = pd.DataFrame({"row_id": test_data.row_id, "microbusiness_density": test_preds})
+output = pd.DataFrame(
+    {"row_id": test_data.row_id, "microbusiness_density": test_preds}
+)
 output.to_csv("./working/submission.csv", index=False)

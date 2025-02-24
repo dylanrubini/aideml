@@ -1,8 +1,8 @@
-import pandas as pd
-from sklearn.linear_model import LinearRegression
-from sklearn.model_selection import cross_val_score, KFold
-from sklearn.impute import SimpleImputer
 import numpy as np
+import pandas as pd
+from sklearn.impute import SimpleImputer
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import KFold, cross_val_score
 
 # Load the data
 data = pd.read_csv("./input/data.csv")
@@ -27,9 +27,15 @@ y_train = train_data["x_e_out [-]"]
 model = LinearRegression()
 kf = KFold(n_splits=10, shuffle=True, random_state=1)
 rmse_scores = cross_val_score(
-    model, X_train_imputed, y_train, scoring="neg_root_mean_squared_error", cv=kf
+    model,
+    X_train_imputed,
+    y_train,
+    scoring="neg_root_mean_squared_error",
+    cv=kf,
 )
-print(f"10-fold CV RMSE: {-np.mean(rmse_scores):.4f} (+/- {np.std(rmse_scores):.4f})")
+print(
+    f"10-fold CV RMSE: {-np.mean(rmse_scores):.4f} (+/- {np.std(rmse_scores):.4f})"
+)
 
 # Fit the model on the entire training set
 model.fit(X_train_imputed, y_train)
@@ -45,7 +51,9 @@ X_test_imputed = imputer.transform(X_test)
 nan_data["x_e_out [-]"] = model.predict(X_test_imputed)
 
 # Merge predictions back into the test data
-test_data = test_data.merge(nan_data[["id", "x_e_out [-]"]], on="id", how="left")
+test_data = test_data.merge(
+    nan_data[["id", "x_e_out [-]"]], on="id", how="left"
+)
 
 # Save the submission file
 test_data.to_csv("./working/submission.csv", index=False)

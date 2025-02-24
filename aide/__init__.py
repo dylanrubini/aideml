@@ -1,16 +1,17 @@
 from dataclasses import dataclass
 
+from omegaconf import OmegaConf
+from rich.status import Status
+
 from .agent import Agent
 from .interpreter import Interpreter
 from .journal import Journal
-from omegaconf import OmegaConf
-from rich.status import Status
 from .utils.config import (
+    _load_cfg,
     load_task_desc,
     prep_agent_workspace,
-    save_run,
-    _load_cfg,
     prep_cfg,
+    save_run,
 )
 
 
@@ -39,7 +40,9 @@ class Experiment:
 
         self.task_desc = load_task_desc(self.cfg)
 
-        with Status("Preparing agent workspace (copying and extracting files) ..."):
+        with Status(
+            "Preparing agent workspace (copying and extracting files) ..."
+        ):
             prep_agent_workspace(self.cfg)
 
         self.journal = Journal()
@@ -59,4 +62,6 @@ class Experiment:
         self.interpreter.cleanup_session()
 
         best_node = self.journal.get_best_node(only_good=False)
-        return Solution(code=best_node.code, valid_metric=best_node.metric.value)
+        return Solution(
+            code=best_node.code, valid_metric=best_node.metric.value
+        )

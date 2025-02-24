@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import StratifiedKFold
 
 # Load the data
 train_data = pd.read_csv("./input/train.csv")
@@ -17,8 +17,14 @@ auc_scores = []
 
 # Perform 10-fold cross-validation
 for train_idx, valid_idx in cv.split(X_train, y_train):
-    X_train_fold, X_valid_fold = X_train.iloc[train_idx], X_train.iloc[valid_idx]
-    y_train_fold, y_valid_fold = y_train.iloc[train_idx], y_train.iloc[valid_idx]
+    X_train_fold, X_valid_fold = (
+        X_train.iloc[train_idx],
+        X_train.iloc[valid_idx],
+    )
+    y_train_fold, y_valid_fold = (
+        y_train.iloc[train_idx],
+        y_train.iloc[valid_idx],
+    )
 
     # Train the model
     model.fit(X_train_fold, y_train_fold)

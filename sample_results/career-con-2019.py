@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 # Load the data
@@ -41,7 +41,9 @@ accuracy = accuracy_score(y_val, y_pred)
 print(f"Validation Accuracy: {accuracy}")
 
 # Prepare the test data
-test_features = X_test.drop(["row_id", "series_id", "measurement_number"], axis=1)
+test_features = X_test.drop(
+    ["row_id", "series_id", "measurement_number"], axis=1
+)
 test_features = scaler.transform(test_features)
 
 # Predict on the test set

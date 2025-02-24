@@ -1,9 +1,9 @@
-import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import roc_auc_score
+import pandas as pd
 from lightgbm import LGBMClassifier
-from sklearn.preprocessing import OrdinalEncoder, OneHotEncoder
+from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder
 
 # Load the data
 train_data = pd.read_csv("./input/train.csv")
@@ -30,7 +30,9 @@ X_test[binary_cols + ordinal_cols] = ordinal_encoder.transform(
 )
 
 # One-hot encoding for nominal features with low cardinality
-low_cardinality_nom_cols = [col for col in nominal_cols if X[col].nunique() < 10]
+low_cardinality_nom_cols = [
+    col for col in nominal_cols if X[col].nunique() < 10
+]
 one_hot_encoder = OneHotEncoder(handle_unknown="ignore", sparse=False)
 X_low_card_nom = pd.DataFrame(
     one_hot_encoder.fit_transform(X[low_cardinality_nom_cols])
@@ -40,14 +42,18 @@ X_test_low_card_nom = pd.DataFrame(
 )
 
 # Frequency encoding for nominal features with high cardinality
-high_cardinality_nom_cols = [col for col in nominal_cols if X[col].nunique() >= 10]
+high_cardinality_nom_cols = [
+    col for col in nominal_cols if X[col].nunique() >= 10
+]
 for col in high_cardinality_nom_cols:
     freq_encoder = X[col].value_counts(normalize=True)
     X[col] = X[col].map(freq_encoder)
     X_test[col] = X_test[col].map(freq_encoder)
 
 # Combine all features
-X = pd.concat([X, X_low_card_nom], axis=1).drop(low_cardinality_nom_cols, axis=1)
+X = pd.concat([X, X_low_card_nom], axis=1).drop(
+    low_cardinality_nom_cols, axis=1
+)
 X_test = pd.concat([X_test, X_test_low_card_nom], axis=1).drop(
     low_cardinality_nom_cols, axis=1
 )

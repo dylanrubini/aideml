@@ -3,6 +3,7 @@ import random
 from typing import Any, Callable, cast
 
 import humanize
+
 from .backend import FunctionSpec, query
 from .interpreter import ExecutionResult
 from .journal import Journal, Node
@@ -64,7 +65,9 @@ class Agent:
 
         # initial drafting
         if len(self.journal.draft_nodes) < search_cfg.num_drafts:
-            logger.debug("[search policy] drafting new node (not enough drafts)")
+            logger.debug(
+                "[search policy] drafting new node (not enough drafts)"
+            )
             return None
 
         # debugging
@@ -278,7 +281,9 @@ class Agent:
             self.update_data_preview()
 
         parent_node = self.search_policy()
-        logger.debug(f"Agent is generating code, parent node type: {type(parent_node)}")
+        logger.debug(
+            f"Agent is generating code, parent node type: {type(parent_node)}"
+        )
 
         if parent_node is None:
             result_node = self._draft()

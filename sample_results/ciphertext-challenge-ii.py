@@ -1,7 +1,8 @@
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
 import re
+
+import pandas as pd
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
 
 # Load the data
 train_df = pd.read_csv("./input/training.csv")
@@ -11,7 +12,9 @@ test_df = pd.read_csv("./input/test.csv")
 train, val = train_test_split(train_df, test_size=0.1, random_state=42)
 
 # Ensure the 'ciphertext' column is included in the 'val' dataframe
-val["ciphertext"] = val["text"].apply(lambda x: x)  # Placeholder for actual encryption
+val["ciphertext"] = val["text"].apply(
+    lambda x: x
+)  # Placeholder for actual encryption
 
 
 # Function to perform frequency analysis on a given text
@@ -45,7 +48,9 @@ def find_index(predicted_text, train_df):
     return None
 
 
-val["predicted_index"] = val["predicted_text"].apply(lambda x: find_index(x, train_df))
+val["predicted_index"] = val["predicted_text"].apply(
+    lambda x: find_index(x, train_df)
+)
 
 # Calculate the accuracy of the predicted index
 accuracy = accuracy_score(val["index"], val["predicted_index"])

@@ -1,12 +1,12 @@
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.metrics import mean_squared_error
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
-from sklearn.impute import SimpleImputer
 import numpy as np
+import pandas as pd
+from sklearn.compose import ColumnTransformer
+from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.impute import SimpleImputer
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder
 
 # Load the data
 train_data = pd.read_csv("./input/train.csv")
@@ -30,8 +30,16 @@ categorical_transformer = Pipeline(
 # Bundle preprocessing for numerical and categorical data
 preprocessor = ColumnTransformer(
     transformers=[
-        ("num", numerical_transformer, X.select_dtypes(exclude=["object"]).columns),
-        ("cat", categorical_transformer, X.select_dtypes(include=["object"]).columns),
+        (
+            "num",
+            numerical_transformer,
+            X.select_dtypes(exclude=["object"]).columns,
+        ),
+        (
+            "cat",
+            categorical_transformer,
+            X.select_dtypes(include=["object"]).columns,
+        ),
     ]
 )
 

@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Type, TypeVar
 
 import dataclasses_json
+
 from ..journal import Journal
 
 
@@ -11,7 +12,9 @@ def dumps_json(obj: dataclasses_json.DataClassJsonMixin):
     """Serialize AIDE dataclasses (such as Journals) to JSON."""
     if isinstance(obj, Journal):
         obj = copy.deepcopy(obj)
-        node2parent = {n.id: n.parent.id for n in obj.nodes if n.parent is not None}
+        node2parent = {
+            n.id: n.parent.id for n in obj.nodes if n.parent is not None
+        }
         for n in obj.nodes:
             n.parent = None
             n.children = set()

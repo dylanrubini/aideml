@@ -1,6 +1,7 @@
-import pandas as pd
-import numpy as np
 from math import exp
+
+import numpy as np
+import pandas as pd
 
 # Load the data
 family_data = pd.read_csv("./input/family_data.csv")
@@ -50,7 +51,9 @@ def accounting_penalty(occupancy):
     for day in range(N_DAYS - 1, -1, -1):
         Nd = occupancy[day]
         Nd_next = occupancy[day + 1]
-        penalties[day] = max(0, (Nd - 125) / 400 * Nd ** (0.5 + abs(Nd - Nd_next) / 50))
+        penalties[day] = max(
+            0, (Nd - 125) / 400 * Nd ** (0.5 + abs(Nd - Nd_next) / 50)
+        )
     return penalties.sum()
 
 
@@ -61,9 +64,9 @@ def simulated_annealing(family_data, sample_submission, cost_matrix):
     for i, day in enumerate(best):
         occupancy[day] += family_data.iloc[i]["n_people"]
     occupancy[0] = occupancy[N_DAYS]  # Occupancy for the "zeroth" day
-    best_score = cost_matrix[np.arange(N_FAMILY), best].sum() + accounting_penalty(
-        occupancy
-    )
+    best_score = cost_matrix[
+        np.arange(N_FAMILY), best
+    ].sum() + accounting_penalty(occupancy)
     temperature = 1.0
     alpha = 0.99
     for step in range(10000):
@@ -77,13 +80,17 @@ def simulated_annealing(family_data, sample_submission, cost_matrix):
         new_occupancy = occupancy.copy()
         new_occupancy[old_day] -= family_data.iloc[family_id]["n_people"]
         new_occupancy[new_day] += family_data.iloc[family_id]["n_people"]
-        new_occupancy[0] = new_occupancy[N_DAYS]  # Occupancy for the "zeroth" day
-        if any((new_occupancy < MIN_OCCUPANCY) | (new_occupancy > MAX_OCCUPANCY)):
+        new_occupancy[0] = new_occupancy[
+            N_DAYS
+        ]  # Occupancy for the "zeroth" day
+        if any(
+            (new_occupancy < MIN_OCCUPANCY) | (new_occupancy > MAX_OCCUPANCY)
+        ):
             best[family_id] = old_day  # Revert changes
             continue
-        new_score = cost_matrix[np.arange(N_FAMILY), best].sum() + accounting_penalty(
-            new_occupancy
-        )
+        new_score = cost_matrix[
+            np.arange(N_FAMILY), best
+        ].sum() + accounting_penalty(new_occupancy)
 
         # Acceptance probability
         if new_score < best_score or np.random.rand() < exp(

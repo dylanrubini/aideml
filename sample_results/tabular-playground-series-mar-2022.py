@@ -24,7 +24,9 @@ X = pd.get_dummies(X, columns=["direction"], drop_first=True)
 y = train_data["congestion"]
 
 # Split the data into training and validation sets
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_val, y_train, y_val = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
 # Initialize and train the model
 model = RandomForestRegressor(n_estimators=100, random_state=42)
