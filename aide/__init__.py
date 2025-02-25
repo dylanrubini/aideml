@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Union
 
 from omegaconf import OmegaConf
 from rich.status import Status
@@ -23,22 +25,33 @@ class Solution:
 
 class Experiment:
 
-    def __init__(self, data_dir: str, goal: str, eval: str | None = None):
+    def __init__(
+        self,
+        data_dir: Union[str, Path],
+        repo_dir: Union[str, Path],
+        repo_working_dir: Union[str, Path],
+        goal: str,
+        paper_content: str,
+        eval: str | None = None,
+    ):
         """Initialize a new experiment run.
 
         Args:
-            data_dir (str): Path to the directory containing the data files.
+            data_dir (str, Path): Path to the directory containing the data files.
             goal (str): Description of the goal of the task.
             eval (str | None, optional): Optional description of the preferred way for the agent to evaluate its solutions.
         """
 
         _cfg = _load_cfg(use_cli_args=False)
         _cfg.data_dir = data_dir
+        _cfg.repo_dir = repo_dir
+        _cfg.repo_working_dir = repo_working_dir
         _cfg.goal = goal
         _cfg.eval = eval
         self.cfg = prep_cfg(_cfg)
 
         self.task_desc = load_task_desc(self.cfg)
+        self.paper_content = paper_content
 
         with Status(
             "Preparing agent workspace (copying and extracting files) ..."
@@ -48,6 +61,7 @@ class Experiment:
         self.journal = Journal()
         self.agent = Agent(
             task_desc=self.task_desc,
+            paper_content=self.paper_content,
             cfg=self.cfg,
             journal=self.journal,
         )

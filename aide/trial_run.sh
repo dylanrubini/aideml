@@ -86,5 +86,5 @@ fi
 rm -rf logs/
 rm -rf workspaces/
 
-python trial_run.py
+python run_trial_task.py
 # python trial_run.py --log-level DEBUG

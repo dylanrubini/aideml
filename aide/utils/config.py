@@ -58,13 +58,14 @@ class AgentConfig:
 @dataclass
 class ExecConfig:
     timeout: int
-    agent_file_name: str
     format_tb_ipython: bool
 
 
 @dataclass
 class Config(Hashable):
     data_dir: Path | None
+    repo_dir: Path | None
+    repo_working_dir: Path | None
     desc_file: Path | None
 
     goal: str | None
@@ -182,6 +183,7 @@ def prep_agent_workspace(cfg: Config):
     """Setup the agent's workspace and preprocess data if necessary."""
     (cfg.workspace_dir / "input").mkdir(parents=True, exist_ok=True)
     (cfg.workspace_dir / "working").mkdir(parents=True, exist_ok=True)
+    (cfg.workspace_dir / "repo").mkdir(parents=True, exist_ok=True)
 
     if cfg.data_dir is not None:
         copytree(
@@ -191,6 +193,13 @@ def prep_agent_workspace(cfg: Config):
         )
         if cfg.preprocess_data:
             preproc_data(cfg.workspace_dir / "input")
+
+    if cfg.repo_dir is not None:
+        copytree(
+            cfg.repo_dir,
+            cfg.workspace_dir / "repo",
+            use_symlinks=not cfg.copy_data,
+        )
 
 
 def save_run(cfg: Config, journal):

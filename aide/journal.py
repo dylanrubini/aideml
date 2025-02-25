@@ -40,6 +40,7 @@ class Node(DataClassJsonMixin):
     exc_type: str | None = field(default=None, kw_only=True)
     exc_info: dict | None = field(default=None, kw_only=True)
     exc_stack: list[tuple] | None = field(default=None, kw_only=True)
+    submission_results: dict | None = field(default=None, kw_only=True)
 
     # ---- evaluation ----
     # post-execution result analysis (findings/feedback)
@@ -72,6 +73,7 @@ class Node(DataClassJsonMixin):
         self.exc_type = exec_result.exc_type
         self.exc_info = exec_result.exc_info
         self.exc_stack = exec_result.exc_stack
+        self.submission_results = exec_result.submission_results
 
     @property
     def term_out(self) -> str:

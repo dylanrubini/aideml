@@ -49,11 +49,13 @@ class Agent:
     def __init__(
         self,
         task_desc: str,
+        paper_content: str,
         cfg: Config,
         journal: Journal,
     ):
         super().__init__()
         self.task_desc = task_desc
+        self.paper_content = paper_content
         self.cfg = cfg
         self.acfg = cfg.agent
         self.journal = journal
@@ -96,38 +98,26 @@ class Agent:
 
     @property
     def _prompt_environment(self):
-        pkgs = [
-            "numpy",
-            "pandas",
-            "scikit-learn",
-            "statsmodels",
-            "xgboost",
-            "lightGBM",
-            "torch",
-            "torchvision",
-            "torch-geometric",
-            "bayesian-optimization",
-            "timm",
-        ]
+        pkgs = ["pybamm", "casadi", "scipy", "numpy", "matplotlib"]
         random.shuffle(pkgs)
         pkg_str = ", ".join([f"`{p}`" for p in pkgs])
 
         env_prompt = {
-            "Installed Packages": f"Your solution can use any relevant machine learning packages such as: {pkg_str}. Feel free to use any other packages too (all packages are already installed!). For neural networks we suggest using PyTorch rather than TensorFlow."
+            "Installed Packages": f"Your solution can use any relevant packages such as: {pkg_str}."
         }
         return env_prompt
 
     @property
     def _prompt_impl_guideline(self):
         impl_guideline = [
-            "The code should **implement the proposed solution** and **print the value of the evaluation metric computed on a hold-out validation set**.",
+            "The code should **implement the proposed solution**",
             "The code should be a single-file python program that is self-contained and can be executed as-is.",
             "No parts of the code should be skipped, don't terminate the before finishing the script.",
             "Your response should only contain a single code block.",
             f"Be aware of the running time of the code, it should complete within {humanize.naturaldelta(self.cfg.exec.timeout)}.",
-            'All the provided input data is stored in "./input" directory.',
-            '**If there is test data provided for this task, please save the test predictions in a `submission.csv` file in the "./working" directory as described in the task description** This is extremely important since this file is used for grading/evaluation. DO NOT FORGET THE submission.csv file!',
-            'You can also use the "./working" directory to store any temporary files that your code needs to create.',
+            "**Please save the requested figure as figure.png**. if the figure has multiple parts, ensure to combine in subplots."
+            'Create a submission.json file with the data contained within the figure and store in the "./working" directory. This is extremely important since this file is used for grading/evaluation. DO NOT FORGET THE submission.json file!',
+            'You can also use the "./working" directory to store any temporary files that your code needs to create. or figures of datafiles',
         ]
         if self.acfg.expose_prediction:
             impl_guideline.append(
@@ -147,14 +137,18 @@ class Agent:
     def _prompt_resp_fmt(self):
         return {
             "Response format": (
-                "Your response should be a brief outline/sketch of your proposed solution in natural language (3-5 sentences), "
-                "followed by a single markdown code block (wrapped in ```) which implements this solution and prints out the evaluation metric. "
+                "Your response should be a brief outline/sketch of your proposed solution in natural language (3-10 sentences), "
+                "followed by a single markdown code block (wrapped in ```) which implements this solution, plots and saves the Figure, and stores the Figure data in the submission.json file"
                 "There should be no additional headings or text in your response. Just natural language text followed by a newline and then the markdown code block. "
             )
         }
 
     def plan_and_code_query(self, prompt, retries=3) -> tuple[str, str]:
         """Generate a natural language plan + code in the same LLM call and split them apart."""
+
+        # Include journal publication is context
+        prompt["Article"] = self.paper_content
+
         completion_text = None
         for _ in range(retries):
             completion_text = query(
@@ -179,9 +173,10 @@ class Agent:
     def _draft(self) -> Node:
         prompt: Any = {
             "Introduction": (
-                "You are a Kaggle grandmaster attending a competition. "
-                "In order to win this competition, you need to come up with an excellent and creative plan "
-                "for a solution and then implement this solution in Python. We will now provide a description of the task."
+                "You are a leading expert in computational science and engineering with the goal of writing + running code to reproduce a single or set of figures in a academic publication released very recently. "
+                "In order to accurately reproduce the figure, you need to come up with an excellent and creative plan "
+                "for a solution and then implement this solution in Python by leveraging a library explained the task description. "
+                "We will now provide a description of the task."
             ),
             "Task description": self.task_desc,
             "Memory": self.journal.generate_summary(),
@@ -190,13 +185,10 @@ class Agent:
         prompt["Instructions"] |= self._prompt_resp_fmt
         prompt["Instructions"] |= {
             "Solution sketch guideline": [
-                "This first solution design should be relatively simple, without ensembling or hyper-parameter optimization.",
+                "This first solution design should be relatively simple. Coding enhancements can be introduced through iterative improvements",
                 "Take the Memory section into consideration when proposing the design,"
-                " don't propose the same modelling solution but keep the evaluation the same.",
-                "The solution sketch should be 3-5 sentences.",
-                "Propose an evaluation metric that is reasonable for this task.",
+                "The solution sketch should be 3-10 sentences.",
                 "Don't suggest to do EDA.",
-                "The data is already prepared and available in the `./input` directory. There is no need to unzip any files.",
             ],
         }
         prompt["Instructions"] |= self._prompt_impl_guideline
@@ -211,8 +203,9 @@ class Agent:
     def _improve(self, parent_node: Node) -> Node:
         prompt: Any = {
             "Introduction": (
-                "You are a Kaggle grandmaster attending a competition. You are provided with a previously developed "
-                "solution below and should improve it in order to further increase the (test time) performance. "
+                "You are a leading expert in computational science and engineering attempting to reproduce results in an academic paper."
+                " You are provided with a previously developed"
+                "solution below and should improve it in order to ensure the results are correct and reproduce the figure in the paper requested in the task description"
                 "For this you should first outline a brief plan in natural language for how the solution can be improved and "
                 "then implement this improvement in Python based on the provided previous solution. "
             ),
@@ -231,7 +224,7 @@ class Agent:
                 "You should be very specific and should only propose a single actionable improvement.",
                 "This improvement should be atomic so that we can experimentally evaluate the effect of the proposed change.",
                 "Take the Memory section into consideration when proposing the improvement.",
-                "The solution sketch should be 3-5 sentences.",
+                "The solution sketch should be 3-10 sentences.",
                 "Don't suggest to do EDA.",
             ],
         }
@@ -247,7 +240,7 @@ class Agent:
     def _debug(self, parent_node: Node) -> Node:
         prompt: Any = {
             "Introduction": (
-                "You are a Kaggle grandmaster attending a competition. "
+                "You are a leading expert in computational science and engineering attempting to reproduce results in an academic paper. "
                 "Your previous solution had a bug, so based on the information below, you should revise it in order to fix this bug. "
                 "Your response should be an implementation outline in natural language,"
                 " followed by a single markdown code block which implements the bugfix/solution."
@@ -260,7 +253,36 @@ class Agent:
         prompt["Instructions"] |= self._prompt_resp_fmt
         prompt["Instructions"] |= {
             "Bugfix improvement sketch guideline": [
-                "You should write a brief natural language description (3-5 sentences) of how the issue in the previous implementation can be fixed.",
+                "You should write a brief natural language description (3-10 sentences) of how the issue in the previous implementation can be fixed.",
+                "Don't suggest to do EDA.",
+            ],
+        }
+        prompt["Instructions"] |= self._prompt_impl_guideline
+
+        if self.acfg.data_preview:
+            prompt["Data Overview"] = self.data_preview
+
+        plan, code = self.plan_and_code_query(prompt)
+        return Node(plan=plan, code=code, parent=parent_node)
+
+    def _critic(self, parent_node: Node) -> Node:
+        prompt: Any = {
+            "Introduction": (
+                "You are a leading expert in computational science and engineering attempting to reproduce results in an academic paper. "
+                "Your role is to determine whether the code previously implemented follows the same implementation described in the Article markdown file"
+                "Your response should be an implementation outline in natural language. "
+                "If the implementation discussed in the Article and the code implemented are not consistent, create a plan to fix it "
+                " followed by a single markdown code block which implements a solution that is faithful with implementation described in the paper."
+            ),
+            "Task description": self.task_desc,
+            "Current implementation": wrap_code(parent_node.code),
+            "Execution output": wrap_code(parent_node.term_out, lang=""),
+            "Instructions": {},
+        }
+        prompt["Instructions"] |= self._prompt_resp_fmt
+        prompt["Instructions"] |= {
+            "Faithfulness improvement sketch guideline": [
+                "You should write a brief natural language plan (3-10 sentences) of how the issue in the previous implementation can be fixed.",
                 "Don't suggest to do EDA.",
             ],
         }
@@ -287,11 +309,17 @@ class Agent:
         )
 
         if parent_node is None:
+            print("Drafting...")
             result_node = self._draft()
+            print("done!")
         elif parent_node.is_buggy:
+            print("Debugging...")
             result_node = self._debug(parent_node)
+            print("done!")
         else:
+            print("Improving...")
             result_node = self._improve(parent_node)
+            print("done!")
 
         self.parse_exec_result(
             node=result_node,
@@ -300,19 +328,26 @@ class Agent:
         self.journal.append(result_node)
 
     def parse_exec_result(self, node: Node, exec_result: ExecutionResult):
+        print("Agent is parsing execution results for node {node.id}")
         logger.info(f"Agent is parsing execution results for node {node.id}")
 
         node.absorb_exec_result(exec_result)
 
         prompt = {
             "Introduction": (
-                "You are a Kaggle grandmaster attending a competition. "
+                "You are a leading expert in computational science and engineering attempting to reproduce results in an academic paper. "
                 "You have written code to solve this task and now need to evaluate the output of the code execution. "
                 "You should determine if there were any bugs as well as report the empirical findings."
+                "By looking at the Figure data within the file submission.json in the directory './working', you should rate the output from 0.0 to 1.0, where the best result is 1.0."
+                "This rating should be based on the physicality of the results and whether they make sense or not. "
+                "The judgement should be analogous to a expert Professor looking at the results and judging based on experience whether they are likely to be accurate or not."
             ),
             "Task description": self.task_desc,
             "Implementation": wrap_code(node.code),
             "Execution output": wrap_code(node.term_out, lang=""),
+            "submission.json results": wrap_code(
+                node.submission_results, lang=""
+            ),
         }
 
         response = cast(

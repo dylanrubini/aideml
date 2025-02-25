@@ -6,6 +6,7 @@ Supports:
 - limits execution time
 """
 
+import json
 import logging
 import os
 import queue
@@ -35,6 +36,7 @@ class ExecutionResult(DataClassJsonMixin):
     exc_type: str | None
     exc_info: dict | None = None
     exc_stack: list[tuple] | None = None
+    submission_results: dict | None = None
 
 
 def exception_summary(e, working_dir, exec_file_name, format_tb_ipython):
@@ -162,8 +164,8 @@ class Interpreter:
             else:
                 event_outq.put(("state:finished", None, None, None))
 
-            # remove the file after execution (otherwise it might be included in the data preview)
-            os.remove(self.agent_file_name)
+            # # remove the file after execution (otherwise it might be included in the data preview)
+            # os.remove(self.agent_file_name)
 
             # put EOF marker to indicate that we're done
             result_outq.put("<|EOF|>")
@@ -223,6 +225,7 @@ class Interpreter:
 
         """
 
+        print("REPL is executing code ")
         logger.debug(f"REPL is executing code (reset_session={reset_session})")
 
         if reset_session:
@@ -243,8 +246,10 @@ class Interpreter:
             state = self.event_outq.get(timeout=10)
         except queue.Empty:
             msg = "REPL child process failed to start execution"
+            print(msg)
             logger.critical(msg)
             while not self.result_outq.empty():
+                print(f"REPL output queue dump: {self.result_outq.get()}")
                 logger.error(
                     f"REPL output queue dump: {self.result_outq.get()}"
                 )
@@ -328,6 +333,24 @@ class Interpreter:
             output.append(
                 f"Execution time: {humanize.naturaldelta(exec_time)} seconds (time limit is {humanize.naturaldelta(self.timeout)})."
             )
+
+        submission_results_file = self.working_dir / "submission.json"
+
+        if submission_results_file.exists():
+
+            print("Found submission submission.json file")
+            with open(submission_results_file) as fh:
+                submission_results = subjson.load(fh)
+
+        else:
+            print("Could NOT find submission submission.json file")
+            submission_results = None
+
         return ExecutionResult(
-            output, exec_time, e_cls_name, exc_info, exc_stack
+            output,
+            exec_time,
+            e_cls_name,
+            exc_info,
+            exc_stack,
+            submission_results,
         )

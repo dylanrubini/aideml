@@ -25,7 +25,7 @@ def dumps_json(obj: dataclasses_json.DataClassJsonMixin):
         obj_dict["node2parent"] = node2parent  # type: ignore
         obj_dict["__version"] = "2"
 
-    return json.dumps(obj_dict, separators=(",", ":"))
+    return json.dumps(obj_dict, separators=(",", ":"), indent=4)
 
 
 def dump_json(obj: dataclasses_json.DataClassJsonMixin, path: Path):
