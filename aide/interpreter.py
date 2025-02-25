@@ -165,7 +165,7 @@ class Interpreter:
                 event_outq.put(("state:finished", None, None, None))
 
             # # remove the file after execution (otherwise it might be included in the data preview)
-            # os.remove(self.agent_file_name)
+            os.remove(self.agent_file_name)
 
             # put EOF marker to indicate that we're done
             result_outq.put("<|EOF|>")

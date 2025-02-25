@@ -1,3 +1,11 @@
+import logging
+
+logging.basicConfig(
+    level=logging.ERROR,  # Only show ERROR and above
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler()],  # Print to console
+)
+
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Union
