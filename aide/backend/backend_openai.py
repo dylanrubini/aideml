@@ -2,7 +2,6 @@
 
 import json
 import logging
-import multiprocessing
 import os
 import time
 from datetime import datetime
@@ -20,8 +19,6 @@ from .utils import (
 )
 
 logger = logging.getLogger("aide")
-
-lock = multiprocessing.Lock()
 
 _client: openai.OpenAI = None  # type: ignore
 oai_spending = None  # type: ignore
@@ -52,15 +49,13 @@ class OAI_Pricing:
                 "tokens_forever": 0,
             }
 
-            with lock:
-                with open(self.token_spending_file, "w") as fh:
-                    json.dump(self.data, fh, indent=4)
+            with open(self.token_spending_file, "w") as fh:
+                json.dump(self.data, fh, indent=4)
 
         else:
 
-            with lock:
-                with open(self.token_spending_file, "r") as fh:
-                    self.data = json.load(fh)
+            with open(self.token_spending_file, "r") as fh:
+                self.data = json.load(fh)
 
             self.dollars_today = self.data["dollars_today"]
             self.dollars_forever = self.data["dollars_forever"]
@@ -92,9 +87,8 @@ class OAI_Pricing:
         self.data["tokens_today"] += tokens_now
         self.data["dollars_today"] += dollars_now
 
-        with lock:
-            with open(self.token_spending_file, "w") as fh:
-                json.dump(self.data, fh, indent=4)
+        with open(self.token_spending_file, "w") as fh:
+            json.dump(self.data, fh, indent=4)
 
         return self.data
 
@@ -130,11 +124,18 @@ def query(
         filtered_kwargs["tools"] = [func_spec.as_openai_tool_dict]
         filtered_kwargs["tool_choice"] = func_spec.openai_tool_choice_dict
 
+    if model_kwargs["model"] == "o3-mini":
+        filtered_kwargs["reasoning_effort"] = "high"
+        del filtered_kwargs["temperature"]
+
     completion = None
     t0 = time.time()
 
-    if model_kwargs["model"] not in ["gpt-4o-mini", "qwen2.5"]:
-        raise NotImplementedError("Only gpt-4o-mini model is currently allowed")
+    allowed_models = ["gpt-4o-mini", "qwen2.5"]  # "o3-mini"
+    if model_kwargs["model"] not in allowed_models:
+        raise NotImplementedError(
+            f"Only the models {allowed_models} are currently allowed"
+        )
 
     # Attempt the API call
     try:

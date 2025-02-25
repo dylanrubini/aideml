@@ -3,7 +3,7 @@
 micromamba deactivate
 micromamba activate aide_agent
 
-allowed_models=("gpt-4o-mini" "qwen2.5")
+allowed_models=("gpt-4o-mini" "o3-mini" "qwen2.5")
 model="$@"
 
 echo "Model requested = ${model}"
