@@ -126,7 +126,7 @@ def query(
 
     if model_kwargs["model"] == "o3-mini":
         filtered_kwargs["reasoning_effort"] = "high"
-        del filtered_kwargs["temperature"]
+        del filtered_kwargs["temperature"]  # o3-mini does not support this
 
     completion = None
     t0 = time.time()

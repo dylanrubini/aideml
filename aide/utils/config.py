@@ -66,6 +66,7 @@ class Config(Hashable):
     data_dir: Path | None
     repo_dir: Path | None
     repo_working_dir: Path | None
+    aider_history_dir: Path | None
     desc_file: Path | None
 
     goal: str | None
@@ -184,6 +185,8 @@ def prep_agent_workspace(cfg: Config):
     (cfg.workspace_dir / "input").mkdir(parents=True, exist_ok=True)
     (cfg.workspace_dir / "working").mkdir(parents=True, exist_ok=True)
     (cfg.workspace_dir / "repo").mkdir(parents=True, exist_ok=True)
+    cfg.aider_history_dir = Path(cfg.workspace_dir / "aider_chat_history")
+    cfg.aider_history_dir.mkdir(parents=True, exist_ok=True)
 
     if cfg.data_dir is not None:
         copytree(

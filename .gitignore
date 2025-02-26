@@ -170,3 +170,4 @@ logs
 .ruff_cache/
 
 spent_tokens.json
+.aider*

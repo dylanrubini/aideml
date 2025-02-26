@@ -1,4 +1,4 @@
-from . import backend_anthropic, backend_openai
+from . import aider_agent, backend_anthropic, backend_openai
 from .utils import FunctionSpec, OutputType, PromptType, compile_prompt_to_md
 
 

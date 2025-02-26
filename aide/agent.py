@@ -4,7 +4,7 @@ from typing import Any, Callable, cast
 
 import humanize
 
-from .backend import FunctionSpec, query
+from .backend import FunctionSpec, aider_agent, query
 from .interpreter import ExecutionResult
 from .journal import Journal, Node
 from .utils import data_preview
@@ -60,6 +60,12 @@ class Agent:
         self.acfg = cfg.agent
         self.journal = journal
         self.data_preview: str | None = None
+
+        self.aider_agent = aider_agent.AiderAgent(
+            model_type=self.acfg.code.model,
+            chat_history_file=self.cfg.aider_history_dir,
+            temperature=self.acfg.code.temp,
+        )
 
     def search_policy(self) -> Node | None:
         """Select a node to work on (or None to draft a new node)."""
