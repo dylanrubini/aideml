@@ -67,6 +67,7 @@ class Agent:
             chat_history_file=self.cfg.aider_history_dir,
             repo_dir=cfg.workspace_dir.joinpath("repo/"),
             temperature=self.acfg.code.temp,
+            per_run_token_limit=self.acfg.search.per_run_token_limit,
         )
 
     def search_policy(self) -> Node | None:
@@ -183,7 +184,12 @@ class Agent:
         prompt_code["Plan"] = plan
         prompt_code["Instructions"] |= self._prompt_impl_guideline
 
-        return extract_code(self.aider_agent.run(prompt_code))
+        output_code = extract_code(self.aider_agent.run(prompt_code))
+
+        if not output_code:
+            raise RuntimeError("Not code produced by AIDER AI Coder")
+
+        return output_code
 
     def plan_and_code_query(self, prompt) -> tuple[str, str]:
         """Generate a natural language plan + code in the same LLM call and split them apart."""
