@@ -1,3 +1,4 @@
+import copy
 import logging
 import random
 from typing import Any, Callable, cast
@@ -64,7 +65,7 @@ class Agent:
         self.aider_agent = aider_agent.AiderAgent(
             model_type=self.acfg.code.model,
             chat_history_file=self.cfg.aider_history_dir,
-            repo_dir=cfg.workspace_dir.joinpath("repo"),
+            repo_dir=cfg.workspace_dir.joinpath("repo/"),
             temperature=self.acfg.code.temp,
         )
 
@@ -105,7 +106,13 @@ class Agent:
 
     @property
     def _prompt_environment(self):
-        pkgs = ["pybamm", "casadi", "scipy", "numpy", "matplotlib"]
+        pkgs = [
+            "pybamm",
+            "casadi",
+            "scipy",
+            "numpy",
+            "matplotlib",
+        ]  # TODO: generalize
         random.shuffle(pkgs)
         pkg_str = ", ".join([f"`{p}`" for p in pkgs])
 
@@ -150,32 +157,44 @@ class Agent:
             )
         }
 
-    def plan_and_code_query(self, prompt, retries=3) -> tuple[str, str]:
+    def do_plan(self, prompt) -> str:
+
+        prompt_plan = copy.copy(prompt)
+
+        prompt_plan["Instructions"] |= {
+            "Response format": (
+                "Your response should firstly be a detailed outline of your proposed solution in natural language without code yet describing each step of the code implementation."
+                "There should be no additional headings or text in your response. Just natural language text"
+            )
+        }
+
+        return query(
+            system_message=prompt_plan,
+            user_message=None,
+            model=self.acfg.code.model,
+            temperature=self.acfg.code.temp,
+            per_run_token_limit=self.acfg.search.per_run_token_limit,
+        )
+
+    def do_code(self, plan, prompt) -> str:
+
+        prompt_code = copy.copy(prompt)
+
+        prompt_code["Plan"] = plan
+        prompt_code["Instructions"] |= self._prompt_impl_guideline
+
+        return extract_code(self.aider_agent.run(prompt_code))
+
+    def plan_and_code_query(self, prompt) -> tuple[str, str]:
         """Generate a natural language plan + code in the same LLM call and split them apart."""
 
-        # Include journal publication is context
+        # Include journal publication as context
         prompt["Article"] = self.paper_content
 
-        completion_text = None
-        for _ in range(retries):
-            completion_text = query(
-                system_message=prompt,
-                user_message=None,
-                model=self.acfg.code.model,
-                temperature=self.acfg.code.temp,
-                per_run_token_limit=self.acfg.search.per_run_token_limit,
-            )
+        plan = self.do_plan(prompt)
+        code = self.do_code(plan, prompt)
 
-            code = extract_code(completion_text)
-            nl_text = extract_text_up_to_code(completion_text)
-
-            if code and nl_text:
-                # merge all code blocks into a single string
-                return nl_text, code
-
-            print("Plan + code extraction failed, retrying...")
-        print("Final plan + code extraction attempt failed, giving up...")
-        return "", completion_text  # type: ignore
+        return plan, code
 
     def _draft(self) -> Node:
         prompt: Any = {
@@ -189,7 +208,6 @@ class Agent:
             "Memory": self.journal.generate_summary(),
             "Instructions": {},
         }
-        prompt["Instructions"] |= self._prompt_resp_fmt
         prompt["Instructions"] |= {
             "Solution sketch guideline": [
                 "This first solution design should be relatively simple. Coding enhancements can be introduced through iterative improvements",
@@ -198,7 +216,6 @@ class Agent:
                 "Don't suggest to do EDA.",
             ],
         }
-        prompt["Instructions"] |= self._prompt_impl_guideline
         prompt["Instructions"] |= self._prompt_environment
 
         if self.acfg.data_preview:
@@ -224,7 +241,6 @@ class Agent:
             "Code": wrap_code(parent_node.code),
         }
 
-        prompt["Instructions"] |= self._prompt_resp_fmt
         prompt["Instructions"] |= {
             "Solution improvement sketch guideline": [
                 "The solution sketch should be a brief natural language description of how the previous solution can be improved.",
@@ -235,7 +251,6 @@ class Agent:
                 "Don't suggest to do EDA.",
             ],
         }
-        prompt["Instructions"] |= self._prompt_impl_guideline
 
         plan, code = self.plan_and_code_query(prompt)
         return Node(
@@ -257,14 +272,12 @@ class Agent:
             "Execution output": wrap_code(parent_node.term_out, lang=""),
             "Instructions": {},
         }
-        prompt["Instructions"] |= self._prompt_resp_fmt
         prompt["Instructions"] |= {
             "Bugfix improvement sketch guideline": [
                 "You should write a brief natural language description (3-10 sentences) of how the issue in the previous implementation can be fixed.",
                 "Don't suggest to do EDA.",
             ],
         }
-        prompt["Instructions"] |= self._prompt_impl_guideline
 
         if self.acfg.data_preview:
             prompt["Data Overview"] = self.data_preview
@@ -286,14 +299,12 @@ class Agent:
             "Execution output": wrap_code(parent_node.term_out, lang=""),
             "Instructions": {},
         }
-        prompt["Instructions"] |= self._prompt_resp_fmt
         prompt["Instructions"] |= {
             "Faithfulness improvement sketch guideline": [
                 "You should write a brief natural language plan (3-10 sentences) of how the issue in the previous implementation can be fixed.",
                 "Don't suggest to do EDA.",
             ],
         }
-        prompt["Instructions"] |= self._prompt_impl_guideline
 
         if self.acfg.data_preview:
             prompt["Data Overview"] = self.data_preview

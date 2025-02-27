@@ -5,6 +5,8 @@ from aider.io import InputOutput
 from aider.models import Model
 from aider.repo import GitRepo
 
+from .utils import compile_prompt_to_md
+
 MAP_TOKENS = 4096
 MAX_CHAT_HISTORY_TOKENS = 8 * MAP_TOKENS
 MAX_REFLECTIONS = 5
@@ -36,8 +38,13 @@ class AiderAgent:
         self.model = Model(self.model_type)
         self.model.max_chat_history_tokens = MAX_CHAT_HISTORY_TOKENS
 
+        # fnames = ["run_simulation.py"]
+        # fnames = [self.repo_dir.joinpath(
+        #     "examples/scripts").joinpath(f) for f in fnames]
+        fnames = None
+
         self.git_repo = GitRepo(
-            io=self.io, fnames=None, git_dname=self.repo_dir.resolve()
+            io=self.io, fnames=fnames, git_dname=self.repo_dir.resolve()
         )
 
         self.coder = Coder.create(
@@ -47,17 +54,20 @@ class AiderAgent:
             map_tokens=MAP_TOKENS,  # No. tokens to create repo map
             stream=False,
             auto_commits=False,  # No git committing
-            # fnames=oracle_files,  # TODO: these are files we want aider to work on
+            fnames=fnames,  # TODO: these are files we want aider to work on
             auto_test=False,  # not testing automatically
             test_cmd=None,
             edit_format="diff",
             # verbose=True,
+            detect_urls=False,  # prevent it scarping from the web, FOR NOW
         )
 
         self.coder.temperature = self.temperature
         self.coder.max_reflections = MAX_REFLECTIONS
         self.coder.show_announcements()
 
-    def run(self):
+    def run(self, prompt: str) -> str:
 
-        return coder.run()
+        # TODO: currently disabled preproc because it caused all files
+        # in repo to be added to context and overloaded it
+        return self.coder.run(compile_prompt_to_md(prompt), preproc=False)
