@@ -64,6 +64,7 @@ class Agent:
         self.aider_agent = aider_agent.AiderAgent(
             model_type=self.acfg.code.model,
             chat_history_file=self.cfg.aider_history_dir,
+            repo_dir=cfg.workspace_dir.joinpath("repo"),
             temperature=self.acfg.code.temp,
         )
 

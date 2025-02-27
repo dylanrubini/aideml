@@ -92,3 +92,12 @@ xlrd
 backoff
 streamlit==1.40.2
 python-dotenv
+
+# OpenPhil Task/Agent additional deps
+pybamm==25.1.1
+aider-chat==0.75.1
+rebound
+reboundx
+
+
+

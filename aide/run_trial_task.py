@@ -15,7 +15,7 @@ version = importlib.metadata.version(package_name)
 def main():
 
     repo_url = "https://github.com/pybamm-team/PyBaMM.git"
-    tag_name = "v25.1.1"
+    tag_name = "25.1.1"
 
     # task_file = "rebound_basic_task.md"
     task_file = "pybamm_soh_task.md"
@@ -43,16 +43,15 @@ def main():
         # Pull in repo from Github
         repo = git.Repo.clone_from(repo_url, repo_dir)
         repo.remote().fetch()
-        repo.git.checkout(tag_name)
+        repo.git.checkout(f"v{tag_name}")
 
     try:
-        expected_version = tag_name.strip("v")
         installed_version = importlib.metadata.version("pybamm")
-        if installed_version == expected_version:
+        if installed_version == tag_name:
             print(f"✅ PyBaMM version is correct: {installed_version}")
         else:
             print(
-                f"⚠️ PyBaMM version mismatch: Installed={installed_version}, Expected={expected_version}"
+                f"⚠️ PyBaMM version mismatch: Installed={installed_version}, Expected={tag_name}"
             )
             raise ImportError
 
