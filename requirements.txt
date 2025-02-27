@@ -98,6 +98,7 @@ pybamm==25.1.1
 aider-chat==0.75.1
 rebound
 reboundx
+pre-commit
 
 
 
